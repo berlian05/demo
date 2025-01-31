@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Система учета ремонтных работ</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Система учета ремонтных работ</h1>
+        <nav>
+            <button onclick="showLoginForm()">Вход для специалистов</button>
+        </nav>
+    </header>
+
+    <main>
+        <div id="searchForm" class="search-form">
+            <h2>Поиск информации о ремонтных работах</h2>
+            <form onsubmit="searchWorks(event)">
+                <div class="location-selects">
+                    <select id="federalDistrict" onchange="updateRegions()" required>
+                        <option value="">Выберите федеральный округ</option>
+                        <!-- Заполняется через JavaScript -->
+                    </select>
+                    
+                    <select id="region" onchange="updateCities()" required>
+                        <option value="">Выберите регион</option>
+                        <!-- Заполняется через JavaScript -->
+                    </select>
+                    
+                    <select id="city" required>
+                        <option value="">Выберите город</option>
+                        <!-- Заполняется через JavaScript -->
+                    </select>
+                </div>
+                <input type="text" id="streetSearch" placeholder="Улица" required>
+                <input type="text" id="houseSearch" placeholder="Номер дома" required>
+                <button type="submit">Найти</button>
+            </form>
+        </div>
+
+        <div id="searchResults" class="search-results">
+            <!-- Результаты поиска будут добавляться здесь -->
+        </div>
+
+        <div id="loginForm" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeLoginForm()">&times;</span>
+                <h2>Вход в систему</h2>
+                <form onsubmit="login(event)">
+                    <input type="text" id="username" placeholder="Имя пользователя" required>
+                    <input type="password" id="password" placeholder="Пароль" required>
+                    <button type="submit">Войти</button>
+                </form>
+            </div>
+        </div>
+    </main>
+    <script src="regions.js"></script>
+    <script src="script.js"></script>
+    <script>
+        function searchWorks(event) {
+            event.preventDefault();
+            const federalDistrict = document.getElementById('federalDistrict').value;
+            const region = document.getElementById('region').value;
+            const city = document.getElementById('city').value;
+            const street = document.getElementById('streetSearch').value;
+            const house = document.getElementById('houseSearch').value;
+
+            // Загружаем актуальные данные из localStorage
+            const works = JSON.parse(localStorage.getItem('works')) || [];
+            const selectedCity = document.querySelector('#city option:checked').textContent;
+
+            const results = works.filter(work => {
+                return work.city.toLowerCase() === selectedCity.toLowerCase() && 
+                       work.streets.includes(street) && 
+                       work.houses.includes(house);
+            });
+
+            displayResults(results);
+        }
+
+        // Загружаем данные при старте страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            // Инициализация списков регионов и городов
+            const federalDistrictSelect = document.getElementById('federalDistrict');
+            for (const [key, district] of Object.entries(russianRegions)) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = district.name;
+                federalDistrictSelect.appendChild(option);
+            }
+        });
+    </script>
+</body>
+</html> 

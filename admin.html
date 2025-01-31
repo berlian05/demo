@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель администратора</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .admin-panel {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+            min-height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu button {
+            width: 100%;
+            text-align: left;
+            padding: 0.8rem 1rem;
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid #ddd;
+        }
+
+        .sidebar-menu button:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .content {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .specialist-list {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .specialist-list th,
+        .specialist-list td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .specialist-list th {
+            background: #f5f5f5;
+            font-weight: 500;
+        }
+
+        .add-specialist-form {
+            max-width: 500px;
+        }
+
+        .city-rights {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .logout-btn {
+            background-color: var(--error-color);
+            margin-top: auto;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .organization-type {
+            margin-bottom: 1rem;
+        }
+
+        .organization-list,
+        .specialist-list {
+            width: 100%;
+            margin-top: 2rem;
+        }
+
+        .tab-buttons {
+            margin-bottom: 2rem;
+        }
+
+        .tab-buttons button {
+            margin-right: 1rem;
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid #ddd;
+        }
+
+        .tab-buttons button.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .repair-form {
+            max-width: 800px;
+            margin: 2rem 0;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 2rem;
+            margin: 0.5rem 0;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .streets-section {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+        }
+
+        .street-entry {
+            display: grid;
+            grid-template-columns: 2fr 3fr auto auto;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: start;
+        }
+
+        .houses-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .houses-container input {
+            width: 120px;
+        }
+
+        .small-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .remove-btn {
+            background-color: var(--error-color);
+        }
+
+        .submit-btn {
+            background-color: var(--success-color);
+            margin-right: 1rem;
+        }
+
+        .cancel-btn {
+            background-color: var(--error-color);
+        }
+
+        .repairs-table {
+            width: 100%;
+            margin-top: 2rem;
+        }
+
+        .repairs-table th,
+        .repairs-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .repairs-table th {
+            background-color: #f5f5f5;
+            font-weight: 500;
+        }
+
+        .delete-btn {
+            background-color: var(--error-color);
+            margin-left: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .street-entry {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Панель администратора</h1>
+        <nav>
+            <button onclick="logout()" class="logout-btn">Выйти</button>
+        </nav>
+    </header>
+
+    <main>
+        <div class="admin-panel">
+            <div class="sidebar">
+                <ul class="sidebar-menu">
+                    <li><button onclick="showSection('management')" class="active">Управление</button></li>
+                    <li><button onclick="showSection('repairs')" class="active">Ремонтные работы</button></li>
+                    <li><button onclick="showSection('cities')">Города</button></li>
+                    <li><button onclick="showSection('reports')">Отчеты</button></li>
+                </ul>
+            </div>
+
+            <div class="content" id="mainContent">
+                <!-- Секция управления -->
+                <div id="management" class="section active">
+                    <div class="tab-buttons">
+                        <button onclick="showTab('specialists')" class="active">Специалисты</button>
+                        <button onclick="showTab('organizations')">Организации</button>
+                    </div>
+
+                    <!-- Вкладка специалистов -->
+                    <div id="specialists" class="tab active">
+                        <h2>Управление специалистами</h2>
+                        <button onclick="showAddSpecialistForm()" class="add-btn">Добавить специалиста</button>
+                        
+                        <div class="add-specialist-form" id="addSpecialistForm" style="display: none;">
+                            <h3>Добавить нового специалиста</h3>
+                            <form onsubmit="addSpecialist(event)">
+                                <input type="text" name="name" placeholder="ФИО" required>
+                                <input type="text" name="username" placeholder="Логин" required>
+                                <input type="password" name="password" placeholder="Пароль" required>
+                                <select name="organization" required>
+                                    <option value="">Выберите организацию</option>
+                                    <!-- Организации будут добавлены через JavaScript -->
+                                </select>
+                                <div class="city-rights">
+                                    <label>
+                                        <input type="checkbox" value="moscow"> Москва
+                                    </label>
+                                    <label>
+                                        <input type="checkbox" value="spb"> Санкт-Петербург
+                                    </label>
+                                </div>
+                                <button type="submit">Сохранить</button>
+                            </form>
+                        </div>
+
+                        <table class="specialist-list">
+                            <thead>
+                                <tr>
+                                    <th>ФИО</th>
+                                    <th>Логин</th>
+                                    <th>Организация</th>
+                                    <th>Города</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="specialistsList">
+                                <!-- Список специалистов будет добавлен через JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Вкладка организаций -->
+                    <div id="organizations" class="tab" style="display: none;">
+                        <h2>Управление организациями</h2>
+                        <button onclick="showAddOrganizationForm()" class="add-btn">Добавить организацию</button>
+
+                        <div class="add-organization-form" id="addOrganizationForm" style="display: none;">
+                            <h3>Добавить новую организацию</h3>
+                            <form onsubmit="addOrganization(event)">
+                                <input type="text" name="name" placeholder="Название организации" required>
+                                <select name="type" required>
+                                    <option value="">Выберите тип организации</option>
+                                    <option value="mup">МУП</option>
+                                    <option value="tszh">ТСЖ</option>
+                                    <option value="uk">Управляющая компания</option>
+                                    <option value="other">Другое</option>
+                                </select>
+                                <div class="city-rights">
+                                    <label>
+                                        <input type="checkbox" value="moscow"> Москва
+                                    </label>
+                                    <label>
+                                        <input type="checkbox" value="spb"> Санкт-Петербург
+                                    </label>
+                                </div>
+                                <button type="submit">Сохранить</button>
+                            </form>
+                        </div>
+
+                        <table class="organization-list">
+                            <thead>
+                                <tr>
+                                    <th>Название</th>
+                                    <th>Тип</th>
+                                    <th>Города</th>
+                                    <th>Количество специалистов</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="organizationsList">
+                                <!-- Список организаций будет добавлен через JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Секция ремонтных работ -->
+                <div id="repairs" class="section">
+                    <h2>Управление ремонтными работами</h2>
+                    <button onclick="showAddRepairForm()" class="add-btn">Добавить ремонтные работы</button>
+
+                    <div class="add-repair-form" id="addRepairForm" style="display: none;">
+                        <h3>Добавить новые ремонтные работы</h3>
+                        <form onsubmit="addRepair(event)" class="repair-form">
+                            <div class="form-group">
+                                <label>Тип отключения</label>
+                                <div class="radio-group">
+                                    <label>
+                                        <input type="radio" name="type" value="planned" required> Плановое
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="type" value="emergency" required> Внеплановое
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="location-selects">
+                                <select id="repairFederalDistrict" onchange="updateRepairRegions()" required>
+                                    <option value="">Выберите федеральный округ</option>
+                                </select>
+                                
+                                <select id="repairRegion" onchange="updateRepairCities()" required>
+                                    <option value="">Выберите регион</option>
+                                </select>
+                                
+                                <select id="repairCity" required>
+                                    <option value="">Выберите город</option>
+                                </select>
+                            </div>
+
+                            <div class="streets-section">
+                                <h4>Улицы и дома</h4>
+                                <div id="streetsContainer">
+                                    <div class="street-entry">
+                                        <input type="text" name="streets[]" placeholder="Название улицы" required>
+                                        <div class="houses-container">
+                                            <input type="text" name="houses[]" placeholder="Номер дома" required>
+                                        </div>
+                                        <button type="button" onclick="addHouse(this)" class="small-btn">+ Дом</button>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="addStreet()" class="small-btn">+ Улица</button>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Дата и время отключения</label>
+                                <input type="datetime-local" name="startDate" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" name="hasEndDate" onchange="toggleEndDate(this)">
+                                    Указать время окончания работ
+                                </label>
+                                <input type="datetime-local" name="endDate" id="endDate" style="display: none;">
+                            </div>
+
+                            <div class="form-buttons">
+                                <button type="submit" class="submit-btn">
+                                    <span>Сохранить</span>
+                                </button>
+                                <button type="button" onclick="showAddRepairForm()" class="cancel-btn">
+                                    <span>Отмена</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="repairs-list">
+                        <h3>Текущие ремонтные работы</h3>
+                        <table class="repairs-table">
+                            <thead>
+                                <tr>
+                                    <th>Тип</th>
+                                    <th>Город</th>
+                                    <th>Адрес</th>
+                                    <th>Начало работ</th>
+                                    <th>Окончание работ</th>
+                                    <th>Статус</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="repairsList">
+                                <!-- Список работ будет добавлен через JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="regions.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (!user || user.role !== 'admin') {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Инициализируем список федеральных округов
+            const federalDistrictSelect = document.getElementById('repairFederalDistrict');
+            if (federalDistrictSelect) {
+                federalDistrictSelect.innerHTML = '<option value="">Выберите федеральный округ</option>';
+                for (const [key, district] of Object.entries(russianRegions)) {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = district.name;
+                    federalDistrictSelect.appendChild(option);
+                }
+            }
+
+            // Показываем секцию управления по умолчанию
+            showSection('management');
+            
+            // Загружаем все данные
+            loadOrganizations();
+            loadSpecialists();
+            loadRepairs();
+        });
+
+        function showTab(tabId) {
+            // Скрываем все вкладки
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            document.querySelectorAll('.tab-buttons button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Показываем выбранную вкладку
+            document.getElementById(tabId).style.display = 'block';
+            document.querySelector(`button[onclick="showTab('${tabId}')"]`).classList.add('active');
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+                section.style.display = 'none';
+            });
+            const selectedSection = document.getElementById(sectionId);
+            if (selectedSection) {
+            selectedSection.classList.add('active');
+            selectedSection.style.display = 'block';
+            }
+            
+            document.querySelectorAll('.sidebar-menu button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            const activeButton = document.querySelector(`button[onclick="showSection('${sectionId}')"]`);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
+
+            // Если открыта секция ремонтных работ, загружаем данные
+            if (sectionId === 'repairs') {
+                loadRepairs();
+            }
+        }
+
+        function showAddOrganizationForm() {
+            const form = document.getElementById('addOrganizationForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function addOrganization(event) {
+            event.preventDefault();
+            const form = event.target;
+            const name = form.name.value;
+            const type = form.type.value;
+            const cities = Array.from(form.querySelectorAll('input[type="checkbox"]:checked'))
+                .map(cb => cb.value);
+
+            organizations.push({
+                id: organizations.length + 1,
+                name,
+                type,
+                cities,
+                specialists: 0
+            });
+
+            loadOrganizations();
+            form.reset();
+            showAddOrganizationForm();
+        }
+
+        function loadOrganizations() {
+            const tbody = document.getElementById('organizationsList');
+            tbody.innerHTML = '';
+
+            organizations.forEach(org => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${org.name}</td>
+                    <td>${getOrganizationType(org.type)}</td>
+                    <td>${org.cities.join(', ')}</td>
+                    <td>${org.specialists}</td>
+                    <td>
+                        <button onclick="editOrganization(${org.id})">Редактировать</button>
+                        <button onclick="deleteOrganization(${org.id})" class="delete-btn">Удалить</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Обновляем список организаций в форме добавления специалиста
+            const orgSelect = document.querySelector('select[name="organization"]');
+            orgSelect.innerHTML = '<option value="">Выберите организацию</option>';
+            organizations.forEach(org => {
+                orgSelect.innerHTML += `<option value="${org.id}">${org.name}</option>`;
+            });
+        }
+
+        function getOrganizationType(type) {
+            const types = {
+                mup: 'МУП',
+                tszh: 'ТСЖ',
+                uk: 'Управляющая компания',
+                other: 'Другое'
+            };
+            return types[type] || type;
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+
+        // Добавляем новые функции для работы с ремонтными работами
+        function showAddRepairForm() {
+            const form = document.getElementById('addRepairForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            
+            if (form.style.display === 'block') {
+                // Заполняем списки при открытии формы
+                const federalDistrictSelect = document.getElementById('repairFederalDistrict');
+                federalDistrictSelect.innerHTML = '<option value="">Выберите федеральный округ</option>';
+                
+                for (const [key, district] of Object.entries(russianRegions)) {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = district.name;
+                    federalDistrictSelect.appendChild(option);
+                }
+            }
+        }
+
+        function updateRepairRegions() {
+            const federalDistrictSelect = document.getElementById('repairFederalDistrict');
+            const regionSelect = document.getElementById('repairRegion');
+            const citySelect = document.getElementById('repairCity');
+            
+            regionSelect.innerHTML = '<option value="">Выберите регион</option>';
+            citySelect.innerHTML = '<option value="">Выберите город</option>';
+            
+            const selectedDistrict = federalDistrictSelect.value;
+            if (!selectedDistrict) return;
+            
+            const regions = russianRegions[selectedDistrict].regions;
+            for (const [key, region] of Object.entries(regions)) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = region.name;
+                regionSelect.appendChild(option);
+            }
+        }
+
+        function updateRepairCities() {
+            const federalDistrictSelect = document.getElementById('repairFederalDistrict');
+            const regionSelect = document.getElementById('repairRegion');
+            const citySelect = document.getElementById('repairCity');
+            
+            citySelect.innerHTML = '<option value="">Выберите город</option>';
+            
+            const selectedDistrict = federalDistrictSelect.value;
+            const selectedRegion = regionSelect.value;
+            if (!selectedDistrict || !selectedRegion) return;
+            
+            const cities = russianRegions[selectedDistrict].regions[selectedRegion].cities;
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city.toLowerCase().replace(/\s+/g, '_');
+                option.textContent = city;
+                citySelect.appendChild(option);
+            });
+        }
+
+        function addStreet() {
+            const container = document.getElementById('streetsContainer');
+            const streetDiv = document.createElement('div');
+            streetDiv.className = 'street-entry';
+            streetDiv.innerHTML = `
+                <input type="text" name="streets[]" placeholder="Название улицы" required>
+                <div class="houses-container">
+                    <input type="text" name="houses[]" placeholder="Номер дома" required>
+                </div>
+                <button type="button" onclick="addHouse(this)" class="small-btn">+ Дом</button>
+            `;
+            container.appendChild(streetDiv);
+        }
+
+        function addHouse(button) {
+            const housesContainer = button.previousElementSibling;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = 'houses[]';
+            input.placeholder = 'Номер дома';
+            input.required = true;
+            housesContainer.appendChild(input);
+        }
+
+        function toggleEndDate(checkbox) {
+            const endDateInput = document.getElementById('endDate');
+            endDateInput.style.display = checkbox.checked ? 'block' : 'none';
+            endDateInput.required = checkbox.checked;
+        }
+
+        function addRepair(event) {
+            event.preventDefault();
+            console.log('Adding repair...'); // Для отладки
+
+            const form = event.target;
+            const formData = new FormData(form);
+
+            const citySelect = document.getElementById('repairCity');
+            if (!citySelect || citySelect.selectedIndex === -1) {
+                alert('Пожалуйста, выберите город');
+                return;
+            }
+
+            const selectedCity = citySelect.options[citySelect.selectedIndex].textContent;
+
+            const streets = [];
+            const houses = [];
+            form.querySelectorAll('.street-entry').forEach(streetEntry => {
+                const street = streetEntry.querySelector('input[name="streets[]"]').value;
+                const streetHouses = Array.from(streetEntry.querySelectorAll('input[name="houses[]"]'))
+                    .map(input => input.value);
+                if (street && streetHouses.length > 0) {
+                    streets.push(street);
+                    houses.push(...streetHouses);
+                }
+            });
+
+            if (streets.length === 0 || houses.length === 0) {
+                alert('Пожалуйста, добавьте хотя бы одну улицу и дом');
+                return;
+            }
+
+            const repair = {
+                city: selectedCity,
+                streets: streets,
+                houses: houses,
+                isEmergency: formData.get('type') === 'emergency',
+                startDate: formData.get('startDate'),
+                endDate: formData.get('hasEndDate') ? formData.get('endDate') : null,
+                resolved: false,
+                createdAt: new Date().toISOString()
+            };
+
+            console.log('New repair:', repair); // Для отладки
+
+            // Получаем текущие работы из localStorage
+            let works = JSON.parse(localStorage.getItem('works')) || [];
+            works.push(repair);
+            
+            // Сохраняем обновленный список работ
+            localStorage.setItem('works', JSON.stringify(works));
+            console.log('Works saved:', works); // Для отладки
+
+            loadRepairs();
+            form.reset();
+            showAddRepairForm();
+        }
+
+        function loadRepairs() {
+            const tbody = document.getElementById('repairsList');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            // Загружаем актуальные данные
+            works = JSON.parse(localStorage.getItem('works')) || [];
+
+            works.forEach((repair, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${repair.isEmergency ? 'Внеплановое' : 'Плановое'}</td>
+                    <td>${repair.city}</td>
+                    <td>${repair.streets.join(', ')} (дома: ${repair.houses.join(', ')})</td>
+                    <td>${new Date(repair.startDate).toLocaleString()}</td>
+                    <td>${repair.endDate ? new Date(repair.endDate).toLocaleString() : '-'}</td>
+                    <td>${repair.resolved ? 'Завершено' : 'В работе'}</td>
+                    <td>
+                        <button onclick="markAsResolved(${index})" ${repair.resolved ? 'disabled' : ''}>
+                            Завершить
+                        </button>
+                        <button onclick="deleteRepair(${index})" class="delete-btn">Удалить</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function markAsResolved(index) {
+            works[index].resolved = true;
+            // Сохраняем в localStorage
+            localStorage.setItem('works', JSON.stringify(works));
+            loadRepairs();
+        }
+
+        function deleteRepair(index) {
+            if (confirm('Вы уверены, что хотите удалить эту запись?')) {
+                works.splice(index, 1);
+                // Сохраняем в localStorage
+                localStorage.setItem('works', JSON.stringify(works));
+                loadRepairs();
+            }
+        }
+    </script>
+</body>
+</html> 

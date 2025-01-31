@@ -1,0 +1,535 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --primary-color: #3498db;
+    --primary-dark: #2980b9;
+    --secondary-color: #2ecc71;
+    --secondary-dark: #27ae60;
+    --error-color: #e74c3c;
+    --warning-color: #f1c40f;
+    --text-color: #2c3e50;
+    --text-light: #7f8c8d;
+    --background: #f5f7fa;
+    --card-background: #ffffff;
+    --border-radius: 12px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --transition: all 0.3s ease;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--background);
+    min-height: 100vh;
+}
+
+header {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    padding: 1.5rem 2rem;
+    box-shadow: var(--shadow);
+}
+
+header h1 {
+    font-size: 1.8rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+nav button {
+    background-color: transparent;
+    border: 2px solid white;
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: var(--border-radius);
+    transition: all 0.3s ease;
+}
+
+nav button:hover {
+    background-color: white;
+    color: var(--primary-color);
+}
+
+main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.search-form {
+    max-width: 800px;
+    margin: 2rem auto;
+    background: var(--card-background);
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+.search-form h2 {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+input, select {
+    padding: 0.8rem 1rem;
+    border: 2px solid #e1e8ed;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: var(--transition);
+    width: 100%;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+button:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.close {
+    float: right;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: #666;
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: var(--error-color);
+}
+
+.search-results {
+    margin-top: 2rem;
+}
+
+.work-item {
+    padding: 1.5rem;
+    margin: 1rem 0;
+    border-radius: var(--border-radius);
+    background: var(--card-background);
+    box-shadow: var(--shadow);
+    border-left: 4px solid transparent;
+}
+
+.work-item:hover {
+    transform: translateY(-2px);
+}
+
+.work-item h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.work-item p {
+    margin: 0.5rem 0;
+    color: #666;
+}
+
+.work-item.emergency {
+    border-left-color: var(--error-color);
+    background-color: #fff5f5;
+}
+
+.work-item.resolved {
+    border-left-color: var(--secondary-color);
+    background-color: #f0fff4;
+}
+
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .modal-content {
+        margin: 20% auto;
+        width: 95%;
+    }
+}
+
+/* Добавляем анимацию для кнопок */
+button {
+    position: relative;
+    overflow: hidden;
+}
+
+button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+button:active::after {
+    width: 300px;
+    height: 300px;
+}
+
+/* Стили для кнопок действий */
+.add-btn {
+    background-color: var(--secondary-color);
+}
+
+.add-btn:hover {
+    background-color: var(--secondary-dark);
+}
+
+/* Стили для таблиц */
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 1.5rem 0;
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e1e8ed;
+}
+
+th {
+    background-color: #f8fafc;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+tr:hover {
+    background-color: #f8fafc;
+}
+
+/* Стили для форм в админке */
+.admin-form {
+    max-width: 500px;
+    margin: 1rem 0;
+}
+
+.admin-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.admin-form input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+.location-selects {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+    .location-selects {
+        grid-template-columns: 1fr;
+    }
+}
+
+.repair-form {
+    max-width: 800px;
+    margin: 2rem 0;
+}
+
+.repair-form .form-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.repair-form .submit-btn {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: var(--transition);
+    min-width: 120px;
+}
+
+.repair-form .submit-btn:hover {
+    background-color: var(--secondary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(46, 204, 113, 0.2);
+}
+
+.repair-form .cancel-btn {
+    background-color: var(--error-color);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: var(--transition);
+    min-width: 120px;
+}
+
+.repair-form .cancel-btn:hover {
+    background-color: #c0392b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.2);
+}
+
+/* Обновляем стили для маленьких кнопок в форме */
+.repair-form .small-btn {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    min-width: auto;
+}
+
+.repair-form .small-btn:hover {
+    background-color: var(--primary-dark);
+}
+
+.repair-form .small-btn.remove-btn {
+    background-color: var(--error-color);
+}
+
+.repair-form .small-btn.remove-btn:hover {
+    background-color: #c0392b;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.radio-group {
+    display: flex;
+    gap: 2rem;
+    margin: 0.5rem 0;
+}
+
+.radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.streets-section {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+}
+
+.street-entry {
+    display: grid;
+    grid-template-columns: 2fr 3fr auto auto;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: start;
+}
+
+.houses-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.houses-container input {
+    width: 120px;
+}
+
+.repairs-table {
+    width: 100%;
+    margin-top: 2rem;
+}
+
+.repairs-table th,
+.repairs-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.repairs-table th {
+    background-color: #f5f5f5;
+    font-weight: 500;
+}
+
+.delete-btn {
+    background-color: var(--error-color);
+    margin-left: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .street-entry {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Дополнительные стили для улучшения читаемости */
+.repairs-table td:first-child {
+    font-weight: 500;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-emergency {
+    background-color: #fff5f5;
+    color: var(--error-color);
+}
+
+.status-planned {
+    background-color: #ebf8ff;
+    color: var(--primary-color);
+}
+
+.status-resolved {
+    background-color: #f0fff4;
+    color: var(--secondary-color);
+}
+
+/* Сетка для админ-панели */
+.admin-panel {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2rem;
+    padding: 2rem;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.sidebar {
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    height: fit-content;
+}
+
+.sidebar-menu button {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    color: var(--text-color);
+    padding: 1rem 1.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: var(--border-radius);
+    border: 1px solid #e1e8ed;
+}
+
+.sidebar-menu button.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Адаптивность */
+@media (max-width: 1024px) {
+    .admin-panel {
+        grid-template-columns: 1fr;
+    }
+    
+    .sidebar {
+        position: sticky;
+        top: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .location-selects {
+        grid-template-columns: 1fr;
+    }
+    
+    .street-entry {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 1rem auto;
+    }
+} 
