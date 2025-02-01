@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Система учета ремонтных работ</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=d02b961f-9aa6-4145-902a-0bf32770dc0c&lang=ru_RU" type="text/javascript"></script>
 </head>
 <body>
     <header>
@@ -17,27 +18,52 @@
     <main>
         <div id="searchForm" class="search-form">
             <h2>Поиск информации о ремонтных работах</h2>
-            <form onsubmit="searchWorks(event)">
-                <div class="location-selects">
-                    <select id="federalDistrict" onchange="updateRegions()" required>
-                        <option value="">Выберите федеральный округ</option>
-                        <!-- Заполняется через JavaScript -->
-                    </select>
-                    
-                    <select id="region" onchange="updateCities()" required>
-                        <option value="">Выберите регион</option>
-                        <!-- Заполняется через JavaScript -->
-                    </select>
-                    
-                    <select id="city" required>
-                        <option value="">Выберите город</option>
-                        <!-- Заполняется через JavaScript -->
-                    </select>
+            
+            <div class="view-toggle">
+                <button onclick="switchView('form')" class="active" id="formViewBtn">Поиск по адресу</button>
+                <button onclick="switchView('map')" id="mapViewBtn">Карта</button>
+            </div>
+
+            <div id="formView" class="view-content">
+                <form onsubmit="searchWorks(event)">
+                    <div class="location-selects">
+                        <select id="federalDistrict" onchange="updateRegions()" required>
+                            <option value="">Выберите федеральный округ</option>
+                        </select>
+                        
+                        <select id="region" onchange="updateCities()" required>
+                            <option value="">Выберите регион</option>
+                        </select>
+                        
+                        <select id="city" required>
+                            <option value="">Выберите город</option>
+                        </select>
+                    </div>
+                    <input type="text" id="streetSearch" placeholder="Улица" required>
+                    <input type="text" id="houseSearch" placeholder="Номер дома" required>
+                    <button type="submit">Найти</button>
+                </form>
+            </div>
+
+            <div id="mapView" class="view-content" style="display: none;">
+                <div class="map-container">
+                    <div id="map" style="width: 100%; height: 400px;"></div>
+                    <div class="map-filters">
+                        <label>
+                            <input type="checkbox" checked onchange="filterMarkers('planned')" id="plannedFilter">
+                            <span class="filter-label planned">Плановые</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" checked onchange="filterMarkers('emergency')" id="emergencyFilter">
+                            <span class="filter-label emergency">Внеплановые</span>
+                        </label>
+                        <label>
+                            <input type="checkbox" checked onchange="filterMarkers('completed')" id="completedFilter">
+                            <span class="filter-label completed">Завершены</span>
+                        </label>
+                    </div>
                 </div>
-                <input type="text" id="streetSearch" placeholder="Улица" required>
-                <input type="text" id="houseSearch" placeholder="Номер дома" required>
-                <button type="submit">Найти</button>
-            </form>
+            </div>
         </div>
 
         <div id="searchResults" class="search-results">
@@ -59,6 +85,110 @@
     <script src="regions.js"></script>
     <script src="script.js"></script>
     <script>
+        let map;
+        let markers = [];
+
+        function switchView(view) {
+            console.log('Переключение на вид:', view);
+            
+            document.querySelectorAll('.view-content').forEach(el => {
+                el.style.display = 'none';
+            });
+            const viewElement = document.getElementById(`${view}View`);
+            if (viewElement) {
+                viewElement.style.display = 'block';
+            }
+            
+            document.querySelectorAll('.view-toggle button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`${view}ViewBtn`).classList.add('active');
+
+            if (view === 'map') {
+                console.log('Инициализация карты...');
+                ymaps.ready(() => {
+                    console.log('API Яндекс.Карт загружен');
+                    initMap();
+                }).catch(error => {
+                    console.error('Ошибка при загрузке API:', error);
+                });
+            }
+        }
+
+        function initMap() {
+            console.log('Создание карты...');
+            
+            if (map) {
+                console.log('Карта уже создана');
+                return;
+            }
+
+            try {
+                map = new ymaps.Map('map', {
+                    center: [55.76, 37.64],
+                    zoom: 11,
+                    controls: ['zoomControl', 'typeSelector', 'fullscreenControl']
+                });
+                
+                console.log('Карта успешно создана');
+
+                // Загружаем все ремонтные работы
+                const works = JSON.parse(localStorage.getItem('works')) || [];
+                console.log('Загружено работ:', works.length);
+                
+                works.forEach(work => {
+                    const lat = 55.76 + (Math.random() - 0.5) * 0.2;
+                    const lng = 37.64 + (Math.random() - 0.5) * 0.2;
+                    
+                    const marker = new ymaps.Placemark([lat, lng], {
+                        balloonContent: `
+                            <div class="map-balloon">
+                                <h3>${work.isEmergency ? 'Внеплановые' : 'Плановые'} работы</h3>
+                                <p>Адрес: ${work.streets.join(', ')} (дома: ${work.houses.join(', ')})</p>
+                                <p>Начало: ${new Date(work.startDate).toLocaleString()}</p>
+                                <p>Статус: ${work.resolved ? 'Завершено' : 'В работе'}</p>
+                            </div>
+                        `
+                    }, {
+                        preset: work.isEmergency ? 
+                               'islands#redDotIcon' : 
+                               work.resolved ? 
+                               'islands#greenDotIcon' : 
+                               'islands#blueDotIcon'
+                    });
+
+                    map.geoObjects.add(marker);
+                    markers.push({
+                        marker: marker,
+                        type: work.isEmergency ? 'emergency' : 'planned',
+                        completed: work.resolved
+                    });
+                });
+            } catch (error) {
+                console.error('Ошибка при создании карты:', error);
+            }
+        }
+
+        function filterMarkers(type) {
+            const showPlanned = document.getElementById('plannedFilter').checked;
+            const showEmergency = document.getElementById('emergencyFilter').checked;
+            const showCompleted = document.getElementById('completedFilter').checked;
+
+            markers.forEach(({marker, type, completed}) => {
+                let visible = true;
+
+                if (type === 'planned' && !showPlanned) visible = false;
+                if (type === 'emergency' && !showEmergency) visible = false;
+                if (completed && !showCompleted) visible = false;
+
+                if (visible) {
+                    map.geoObjects.add(marker);
+                } else {
+                    map.geoObjects.remove(marker);
+                }
+            });
+        }
+
         function searchWorks(event) {
             event.preventDefault();
             const federalDistrict = document.getElementById('federalDistrict').value;
@@ -69,19 +199,80 @@
 
             // Загружаем актуальные данные из localStorage
             const works = JSON.parse(localStorage.getItem('works')) || [];
+            console.log('Загруженные работы:', works); // Для отладки
+
             const selectedCity = document.querySelector('#city option:checked').textContent;
+            console.log('Выбранный город:', selectedCity); // Для отладки
 
             const results = works.filter(work => {
-                return work.city.toLowerCase() === selectedCity.toLowerCase() && 
-                       work.streets.includes(street) && 
-                       work.houses.includes(house);
+                const cityMatch = work.city.toLowerCase() === selectedCity.toLowerCase();
+                const streetMatch = work.streets.some(s => s.toLowerCase().includes(street.toLowerCase()));
+                const houseMatch = work.houses.some(h => h.toLowerCase().includes(house.toLowerCase()));
+                return cityMatch && streetMatch && houseMatch;
             });
 
+            console.log('Результаты поиска:', results); // Для отладки
             displayResults(results);
         }
 
-        // Загружаем данные при старте страницы
+        function displayResults(results) {
+            const container = document.getElementById('searchResults');
+            container.innerHTML = '';
+
+            if (results.length === 0) {
+                container.innerHTML = '<p>Ремонтные работы не найдены</p>';
+                return;
+            }
+
+            results.forEach(work => {
+                const div = document.createElement('div');
+                div.className = `work-item ${work.isEmergency ? 'emergency' : ''} ${work.resolved ? 'resolved' : ''}`;
+                
+                const status = work.resolved ? 'Завершено' : 
+                              work.isEmergency ? 'Внеплановое отключение' : 'Плановое отключение';
+                
+                div.innerHTML = `
+                    <h3>${status}</h3>
+                    <p><strong>Город:</strong> ${work.city}</p>
+                    <p><strong>Улица:</strong> ${work.streets.join(', ')}</p>
+                    <p><strong>Дома:</strong> ${work.houses.join(', ')}</p>
+                    <p><strong>${work.isEmergency ? 'Время поступления заявки' : 'Время начала работ'}:</strong> 
+                       ${new Date(work.startDate).toLocaleString()}</p>
+                    ${work.endDate ? `<p><strong>Планируемое время окончания:</strong> ${new Date(work.endDate).toLocaleString()}</p>` : ''}
+                    ${work.resolved ? `<p class="resolved-status">✓ Работы завершены</p>` : ''}
+                `;
+                
+                container.appendChild(div);
+            });
+        }
+
+        // Добавим тестовые данные, если их нет
         document.addEventListener('DOMContentLoaded', function() {
+            let works = JSON.parse(localStorage.getItem('works'));
+            if (!works || works.length === 0) {
+                works = [
+                    {
+                        city: 'Москва',
+                        streets: ['Ленина'],
+                        houses: ['1', '2', '3'],
+                        isEmergency: true,
+                        startDate: '2024-03-20T10:00',
+                        endDate: '2024-03-21T18:00',
+                        resolved: false
+                    },
+                    {
+                        city: 'Санкт-Петербург',
+                        streets: ['Невский проспект'],
+                        houses: ['10', '12'],
+                        isEmergency: false,
+                        startDate: '2024-03-22T09:00',
+                        endDate: '2024-03-22T20:00',
+                        resolved: true
+                    }
+                ];
+                localStorage.setItem('works', JSON.stringify(works));
+            }
+
             // Инициализация списков регионов и городов
             const federalDistrictSelect = document.getElementById('federalDistrict');
             for (const [key, district] of Object.entries(russianRegions)) {

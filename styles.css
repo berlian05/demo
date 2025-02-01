@@ -171,21 +171,12 @@ button:hover {
     border-radius: var(--border-radius);
     background: var(--card-background);
     box-shadow: var(--shadow);
-    border-left: 4px solid transparent;
+    border-left: 4px solid var(--primary-color);
+    transition: transform 0.3s ease;
 }
 
 .work-item:hover {
     transform: translateY(-2px);
-}
-
-.work-item h3 {
-    color: var(--primary-color);
-    margin-bottom: 1rem;
-}
-
-.work-item p {
-    margin: 0.5rem 0;
-    color: #666;
 }
 
 .work-item.emergency {
@@ -196,6 +187,21 @@ button:hover {
 .work-item.resolved {
     border-left-color: var(--secondary-color);
     background-color: #f0fff4;
+}
+
+.work-item h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.work-item p {
+    margin: 0.5rem 0;
+    color: var(--text-color);
+}
+
+.resolved-status {
+    color: var(--secondary-color);
+    font-weight: 500;
 }
 
 @media (max-width: 768px) {
@@ -532,4 +538,131 @@ tr:hover {
         width: 95%;
         margin: 1rem auto;
     }
+}
+
+/* Стили для таблицы городов */
+.cities-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 1.5rem 0;
+    background: var(--card-background);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.cities-table th,
+.cities-table td {
+    padding: 1.2rem;
+    text-align: left;
+    border-bottom: 1px solid #e1e8ed;
+}
+
+.cities-table th {
+    background-color: #f8fafc;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.progress-bar {
+    background: #f0f0f0;
+    border-radius: 4px;
+    height: 8px;
+    position: relative;
+    width: 100%;
+    margin: 8px 0;
+}
+
+.progress-bar .progress {
+    background: var(--primary-color);
+    border-radius: 4px;
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.progress-bar.emergency .progress {
+    background: var(--error-color);
+}
+
+.progress-bar.completed .progress {
+    background: var(--secondary-color);
+}
+
+.progress-bar span {
+    position: absolute;
+    right: 0;
+    top: -20px;
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.cities-table tr:hover {
+    background-color: #f8fafc;
+}
+
+/* Стили для карты */
+.map-container {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 0.75rem;
+    box-shadow: var(--shadow);
+    margin-top: 0.5rem;
+}
+
+.map-filters {
+    margin-top: 0.5rem;
+    display: flex;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+}
+
+.map-filters label {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    cursor: pointer;
+}
+
+.filter-label {
+    padding: 0.2rem 0.5rem;
+    border-radius: 1rem;
+    font-size: 0.85rem;
+}
+
+.filter-label.planned {
+    background-color: #ebf8ff;
+    color: var(--primary-color);
+}
+
+.filter-label.emergency {
+    background-color: #fff5f5;
+    color: var(--error-color);
+}
+
+.filter-label.completed {
+    background-color: #f0fff4;
+    color: var(--secondary-color);
+}
+
+.view-toggle {
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.view-toggle button {
+    background: transparent;
+    color: var(--text-color);
+    border: 1px solid #e1e8ed;
+    padding: 0.5rem 1rem;
+}
+
+.view-toggle button.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
 } 

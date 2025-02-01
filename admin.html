@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Панель администратора</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=d02b961f-9aa6-4145-902a-0bf32770dc0c&lang=ru_RU" type="text/javascript"></script>
     <style>
         .admin-panel {
             display: grid;
@@ -208,6 +209,79 @@
             .street-entry {
                 grid-template-columns: 1fr;
             }
+        }
+
+        /* Стили для карты */
+        .map-container {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            margin-top: 1rem;
+        }
+
+        .map-filters {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1.5rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: var(--border-radius);
+        }
+
+        .map-filters label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .filter-label {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .filter-label.planned {
+            background-color: #ebf8ff;
+            color: var(--primary-color);
+        }
+
+        .filter-label.emergency {
+            background-color: #fff5f5;
+            color: var(--error-color);
+        }
+
+        .filter-label.completed {
+            background-color: #f0fff4;
+            color: var(--secondary-color);
+        }
+
+        .view-toggle {
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .view-toggle button {
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid #e1e8ed;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .view-toggle button.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .view-toggle button:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
         }
     </style>
 </head>
@@ -418,6 +492,56 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- Секция городов -->
+                <div id="cities" class="section">
+                    <h2>Статистика по городам</h2>
+                    
+                    <!-- Добавляем переключатель вида -->
+                    <div class="view-toggle">
+                        <button onclick="switchView('table')" class="active" id="tableViewBtn">Таблица</button>
+                        <button onclick="switchView('map')" id="mapViewBtn">Карта</button>
+                    </div>
+
+                    <!-- Таблица статистики -->
+                    <div id="tableView" class="view-content">
+                        <table class="cities-table">
+                            <thead>
+                                <tr>
+                                    <th>Город</th>
+                                    <th>Плановые работы</th>
+                                    <th>Внеплановые работы</th>
+                                    <th>Всего работ</th>
+                                    <th>Завершено</th>
+                                </tr>
+                            </thead>
+                            <tbody id="citiesList">
+                                <!-- Данные будут добавлены через JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Карта -->
+                    <div id="mapView" class="view-content" style="display: none;">
+                        <div class="map-container">
+                            <div id="map" style="width: 100%; height: 600px;"></div>
+                            <div class="map-filters">
+                                <label>
+                                    <input type="checkbox" checked onchange="filterMarkers('planned')" id="plannedFilter">
+                                    <span class="filter-label planned">Плановые работы</span>
+                                </label>
+                                <label>
+                                    <input type="checkbox" checked onchange="filterMarkers('emergency')" id="emergencyFilter">
+                                    <span class="filter-label emergency">Внеплановые работы</span>
+                                </label>
+                                <label>
+                                    <input type="checkbox" checked onchange="filterMarkers('completed')" id="completedFilter">
+                                    <span class="filter-label completed">Завершенные</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -450,6 +574,12 @@
             loadOrganizations();
             loadSpecialists();
             loadRepairs();
+            loadCitiesStats();
+
+            // Инициализируем карту, если мы находимся в секции городов
+            if (document.getElementById('cities').classList.contains('active')) {
+                ymaps.ready(initMap);
+            }
         });
 
         function showTab(tabId) {
@@ -489,6 +619,11 @@
             if (sectionId === 'repairs') {
                 loadRepairs();
             }
+
+            // Загружаем статистику при переходе на вкладку городов
+            if (sectionId === 'cities') {
+                loadCitiesStats();
+            }
         }
 
         function showAddOrganizationForm() {
@@ -496,6 +631,25 @@
             form.style.display = form.style.display === 'none' ? 'block' : 'none';
         }
 
+        // В начале скрипта добавим инициализацию данных
+        let organizations = JSON.parse(localStorage.getItem('organizations')) || [
+            { id: 1, name: 'МУП ЖКХ', type: 'mup', cities: ['moscow'], specialists: 2 },
+            { id: 2, name: 'ТСЖ Солнечное', type: 'tszh', cities: ['spb'], specialists: 1 }
+        ];
+
+        let specialists = JSON.parse(localStorage.getItem('specialists')) || [];
+
+        // Функция сохранения организаций
+        function saveOrganizations() {
+            localStorage.setItem('organizations', JSON.stringify(organizations));
+        }
+
+        // Функция сохранения специалистов
+        function saveSpecialists() {
+            localStorage.setItem('specialists', JSON.stringify(specialists));
+        }
+
+        // Обновим функцию добавления организации
         function addOrganization(event) {
             event.preventDefault();
             const form = event.target;
@@ -504,32 +658,102 @@
             const cities = Array.from(form.querySelectorAll('input[type="checkbox"]:checked'))
                 .map(cb => cb.value);
 
-            organizations.push({
+            const newOrganization = {
                 id: organizations.length + 1,
                 name,
                 type,
                 cities,
                 specialists: 0
-            });
+            };
 
+            organizations.push(newOrganization);
+            saveOrganizations();
             loadOrganizations();
             form.reset();
             showAddOrganizationForm();
         }
 
-        function loadOrganizations() {
-            const tbody = document.getElementById('organizationsList');
-            tbody.innerHTML = '';
+        // Обновим функцию добавления специалиста
+        function addSpecialist(event) {
+            event.preventDefault();
+            const form = event.target;
+            const name = form.name.value;
+            const organization = form.organization.value;
+            const cities = Array.from(form.querySelectorAll('input[type="checkbox"]:checked'))
+                .map(cb => cb.value);
 
+            const newSpecialist = {
+                id: specialists.length + 1,
+                name,
+                organization,
+                cities,
+                active: true
+            };
+
+            specialists.push(newSpecialist);
+            
+            // Обновляем счетчик специалистов в организации
+            const org = organizations.find(o => o.id === parseInt(organization));
+            if (org) {
+                org.specialists++;
+                saveOrganizations();
+            }
+
+            saveSpecialists();
+            loadSpecialists();
+            form.reset();
+            showAddSpecialistForm();
+        }
+
+        // Функция удаления организации
+        function deleteOrganization(id) {
+            if (confirm('Вы уверены? Это также удалит всех специалистов организации.')) {
+                // Удаляем специалистов организации
+                specialists = specialists.filter(s => s.organization !== id);
+                saveSpecialists();
+                
+                // Удаляем организацию
+                organizations = organizations.filter(o => o.id !== id);
+                saveOrganizations();
+                
+                loadOrganizations();
+                loadSpecialists();
+            }
+        }
+
+        // Функция удаления специалиста
+        function deleteSpecialist(id) {
+            if (confirm('Вы уверены?')) {
+                const specialist = specialists.find(s => s.id === id);
+                if (specialist) {
+                    // Уменьшаем счетчик специалистов в организации
+                    const org = organizations.find(o => o.id === parseInt(specialist.organization));
+                    if (org) {
+                        org.specialists--;
+                        saveOrganizations();
+                    }
+                }
+                
+                specialists = specialists.filter(s => s.id !== id);
+                saveSpecialists();
+                loadSpecialists();
+            }
+        }
+
+        // Функция загрузки организаций
+        function loadOrganizations() {
+            const tbody = document.querySelector('.organization-list tbody');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
             organizations.forEach(org => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${org.name}</td>
-                    <td>${getOrganizationType(org.type)}</td>
+                    <td>${org.type === 'mup' ? 'МУП' : 'ТСЖ'}</td>
                     <td>${org.cities.join(', ')}</td>
                     <td>${org.specialists}</td>
                     <td>
-                        <button onclick="editOrganization(${org.id})">Редактировать</button>
                         <button onclick="deleteOrganization(${org.id})" class="delete-btn">Удалить</button>
                     </td>
                 `;
@@ -538,20 +762,50 @@
 
             // Обновляем список организаций в форме добавления специалиста
             const orgSelect = document.querySelector('select[name="organization"]');
-            orgSelect.innerHTML = '<option value="">Выберите организацию</option>';
-            organizations.forEach(org => {
-                orgSelect.innerHTML += `<option value="${org.id}">${org.name}</option>`;
+            if (orgSelect) {
+                orgSelect.innerHTML = '<option value="">Выберите организацию</option>';
+                organizations.forEach(org => {
+                    const option = document.createElement('option');
+                    option.value = org.id;
+                    option.textContent = org.name;
+                    orgSelect.appendChild(option);
+                });
+            }
+        }
+
+        // Функция загрузки специалистов
+        function loadSpecialists() {
+            const tbody = document.querySelector('.specialist-list tbody');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+            specialists.forEach(spec => {
+                const org = organizations.find(o => o.id === parseInt(spec.organization));
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${spec.name}</td>
+                    <td>${org ? org.name : 'Не указана'}</td>
+                    <td>${spec.cities.join(', ')}</td>
+                    <td>${spec.active ? 'Активен' : 'Не активен'}</td>
+                    <td>
+                        <button onclick="toggleSpecialistStatus(${spec.id})" class="status-btn">
+                            ${spec.active ? 'Деактивировать' : 'Активировать'}
+                        </button>
+                        <button onclick="deleteSpecialist(${spec.id})" class="delete-btn">Удалить</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
             });
         }
 
-        function getOrganizationType(type) {
-            const types = {
-                mup: 'МУП',
-                tszh: 'ТСЖ',
-                uk: 'Управляющая компания',
-                other: 'Другое'
-            };
-            return types[type] || type;
+        // Функция изменения статуса специалиста
+        function toggleSpecialistStatus(id) {
+            const specialist = specialists.find(s => s.id === id);
+            if (specialist) {
+                specialist.active = !specialist.active;
+                saveSpecialists();
+                loadSpecialists();
+            }
         }
 
         function logout() {
@@ -748,6 +1002,161 @@
                 localStorage.setItem('works', JSON.stringify(works));
                 loadRepairs();
             }
+        }
+
+        const citiesData = [
+            { name: 'Москва', planned: 15, emergency: 8 },
+            { name: 'Санкт-Петербург', planned: 12, emergency: 6 },
+            { name: 'Новосибирск', planned: 8, emergency: 4 },
+            { name: 'Екатеринбург', planned: 10, emergency: 5 },
+            { name: 'Казань', planned: 7, emergency: 3 },
+            { name: 'Нижний Новгород', planned: 9, emergency: 4 },
+            { name: 'Челябинск', planned: 6, emergency: 3 },
+            { name: 'Самара', planned: 8, emergency: 5 },
+            { name: 'Уфа', planned: 7, emergency: 4 },
+            { name: 'Ростов-на-Дону', planned: 5, emergency: 2 }
+        ];
+
+        function loadCitiesStats() {
+            const tbody = document.getElementById('citiesList');
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+            
+            citiesData.forEach(city => {
+                const total = city.planned + city.emergency;
+                const completed = Math.floor(Math.random() * total); // Случайное количество завершенных работ
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${city.name}</td>
+                    <td>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: ${(city.planned / 20) * 100}%"></div>
+                            <span>${city.planned}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="progress-bar emergency">
+                            <div class="progress" style="width: ${(city.emergency / 10) * 100}%"></div>
+                            <span>${city.emergency}</span>
+                        </div>
+                    </td>
+                    <td>${total}</td>
+                    <td>
+                        <div class="progress-bar completed">
+                            <div class="progress" style="width: ${(completed / total) * 100}%"></div>
+                            <span>${completed} из ${total}</span>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        let map;
+        let markers = [];
+
+        function switchView(view) {
+            console.log('Переключение на вид:', view); // Отладка
+            
+            document.querySelectorAll('.view-content').forEach(el => {
+                el.style.display = 'none';
+            });
+            const viewElement = document.getElementById(`${view}View`);
+            if (viewElement) {
+                viewElement.style.display = 'block';
+            }
+            
+            document.querySelectorAll('.view-toggle button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`${view}ViewBtn`).classList.add('active');
+
+            if (view === 'map') {
+                console.log('Инициализация карты...'); // Отладка
+                ymaps.ready(() => {
+                    console.log('API Яндекс.Карт загружен'); // Отладка
+                    initMap();
+                }).catch(error => {
+                    console.error('Ошибка при загрузке API:', error);
+                });
+            }
+        }
+
+        function initMap() {
+            console.log('Создание карты...'); // Отладка
+            
+            if (map) {
+                console.log('Карта уже создана'); // Отладка
+                return;
+            }
+
+            try {
+                map = new ymaps.Map('map', {
+                    center: [55.76, 37.64], // Координаты центра Москвы
+                    zoom: 11,
+                    controls: ['zoomControl', 'typeSelector', 'fullscreenControl']
+                });
+                
+                console.log('Карта успешно создана'); // Отладка
+
+                // Загружаем все ремонтные работы
+                const works = JSON.parse(localStorage.getItem('works')) || [];
+                console.log('Загружено работ:', works.length); // Отладка
+                
+                works.forEach(work => {
+                    // В реальном проекте здесь будет геокодинг адреса
+                    const lat = 55.76 + (Math.random() - 0.5) * 0.2;
+                    const lng = 37.64 + (Math.random() - 0.5) * 0.2;
+                    
+                    const marker = new ymaps.Placemark([lat, lng], {
+                        balloonContent: `
+                            <div class="map-balloon">
+                                <h3>${work.isEmergency ? 'Внеплановые' : 'Плановые'} работы</h3>
+                                <p>Адрес: ${work.streets.join(', ')} (дома: ${work.houses.join(', ')})</p>
+                                <p>Начало: ${new Date(work.startDate).toLocaleString()}</p>
+                                <p>Статус: ${work.resolved ? 'Завершено' : 'В работе'}</p>
+                            </div>
+                        `
+                    }, {
+                        preset: work.isEmergency ? 
+                               'islands#redDotIcon' : 
+                               work.resolved ? 
+                               'islands#greenDotIcon' : 
+                               'islands#blueDotIcon'
+                    });
+
+                    map.geoObjects.add(marker);
+                    markers.push({
+                        marker: marker,
+                        type: work.isEmergency ? 'emergency' : 'planned',
+                        completed: work.resolved
+                    });
+                });
+            } catch (error) {
+                console.error('Ошибка при создании карты:', error);
+            }
+        }
+
+        function filterMarkers(type) {
+            const showPlanned = document.getElementById('plannedFilter').checked;
+            const showEmergency = document.getElementById('emergencyFilter').checked;
+            const showCompleted = document.getElementById('completedFilter').checked;
+
+            markers.forEach(({marker, type, completed}) => {
+                let visible = true;
+
+                if (type === 'planned' && !showPlanned) visible = false;
+                if (type === 'emergency' && !showEmergency) visible = false;
+                if (completed && !showCompleted) visible = false;
+
+                if (visible) {
+                    map.geoObjects.add(marker);
+                } else {
+                    map.geoObjects.remove(marker);
+                }
+            });
         }
     </script>
 </body>
