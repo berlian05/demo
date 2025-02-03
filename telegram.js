@@ -33,22 +33,28 @@ async function sendTelegramNotification(repair) {
 }
 
 function formatRepairMessage(repair) {
-    const type = repair.isEmergency ? '🚨 ВНЕПЛАНОВОЕ ОТКЛЮЧЕНИЕ' : '🔧 Плановые работы';
-    const status = repair.resolved ? '✅ Завершено' : '🔄 В работе';
-    const startDate = new Date(repair.startDate).toLocaleString('ru-RU');
-    const endDate = repair.endDate ? new Date(repair.endDate).toLocaleString('ru-RU') : 'Не указано';
+    // Если это сообщение о завершении работ
+    if (repair.messageType === 'completion') {
+        return `
+✅ <b>Работы завершены</b>
 
+🏙 Город: ${repair.city}
+📍 Адрес: ${repair.streets.join(', ')}, дома: ${repair.houses.join(', ')}
+🔧 Тип: ${repair.isEmergency ? 'Внеплановые' : 'Плановые'} работы
+⏰ Начало: ${new Date(repair.startDate).toLocaleString()}
+🏁 Завершено: ${new Date(repair.completedAt).toLocaleString()}
+`;
+    }
+    
+    // Для новых работ оставляем текущий формат
     return `
-<b>${type}</b>
+🚧 <b>Новые ремонтные работы</b>
 
-📍 <b>Город:</b> ${repair.city}
-🏠 <b>Адрес:</b> 
-${repair.streets.map((street, i) => `- ул. ${street}, дома: ${repair.houses[i]}`).join('\n')}
-
-⏰ <b>Начало работ:</b> ${startDate}
-🏁 <b>Планируемое окончание:</b> ${endDate}
-
-<b>Статус:</b> ${status}
+🏙 Город: ${repair.city}
+📍 Адрес: ${repair.streets.join(', ')}, дома: ${repair.houses.join(', ')}
+🔧 Тип: ${repair.isEmergency ? 'Внеплановые' : 'Плановые'} работы
+⏰ Начало: ${new Date(repair.startDate).toLocaleString()}
+${repair.endDate ? `📅 Окончание: ${new Date(repair.endDate).toLocaleString()}` : ''}
 `;
 }
 

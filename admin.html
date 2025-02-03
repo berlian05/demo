@@ -389,46 +389,6 @@
             border-color: var(--primary-color);
         }
 
-        .calendar-view {
-            margin-top: 2rem;
-            padding: 1rem;
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .calendar-header button {
-            background: transparent;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 0.5rem;
-        }
-
-        .calendar-grid div {
-            padding: 0.5rem;
-            text-align: center;
-            background: #f5f5f5;
-            border-radius: var(--border-radius);
-        }
-
-        .calendar-grid div.today {
-            background: var(--primary-color);
-            color: white;
-        }
-
         /* Стили для карточек работ */
         .work-card {
             background: white;
@@ -544,6 +504,56 @@
             border-radius: 8px;
             cursor: pointer;
             display: flex;
+        }
+
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .report-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .report-stats {
+            margin: 1.5rem 0;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .stat-label {
+            color: #666;
+        }
+        
+        .stat-value {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .report-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .report-btn:hover {
+            background: #2980b9;
         }
     </style>
 </head>
@@ -700,14 +710,12 @@
                 <div id="cities" class="section">
                     <h2>Статистика по городам</h2>
                     
-                    <!-- Добавляем переключатель вида -->
-                    <div class="view-toggle">
-                        <button onclick="switchView('table')" class="active" id="tableViewBtn">Таблица</button>
-                        <button onclick="switchView('map')" id="mapViewBtn">Карта</button>
+                    <div class="tab-buttons">
+                        <button onclick="switchView('tableView')" class="active">Таблица</button>
+                        <button onclick="switchView('mapView')">Карта</button>
                     </div>
 
-                    <!-- Таблица статистики -->
-                    <div id="tableView" class="view-content">
+                    <div id="tableView" class="tab-content active">
                         <table class="cities-table">
                             <thead>
                                 <tr>
@@ -724,44 +732,70 @@
                         </table>
                     </div>
 
-                    <!-- Карта -->
-                    <div id="mapView" class="view-content" style="display: none;">
-                        <div class="map-container">
-                            <div id="map" style="width: 100%; height: 600px;"></div>
-                            <div class="map-filters">
-                                <label>
-                                    <input type="checkbox" checked onchange="filterMarkers('planned')" id="plannedFilter">
-                                    <span class="filter-label planned">Плановые работы</span>
-                                </label>
-                                <label>
-                                    <input type="checkbox" checked onchange="filterMarkers('emergency')" id="emergencyFilter">
-                                    <span class="filter-label emergency">Внеплановые работы</span>
-                                </label>
-                                <label>
-                                    <input type="checkbox" checked onchange="filterMarkers('completed')" id="completedFilter">
-                                    <span class="filter-label completed">Завершенные</span>
-                                </label>
+                    <div id="mapView" class="tab-content">
+                        <div id="statsMap" style="width: 100%; height: 400px;"></div>
+                    </div>
+                </div>
+
+                <!-- Секция отчетов -->
+                <div id="reports" class="section">
+                    <h2>Отчеты</h2>
+                    
+                    <div class="reports-grid">
+                        <!-- Отчет по эффективности -->
+                        <div class="report-card">
+                            <h3>Эффективность работ</h3>
+                            <div class="report-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Среднее время выполнения:</span>
+                                    <span class="stat-value" id="avgCompletionTime">--</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">% выполнения в срок:</span>
+                                    <span class="stat-value" id="onTimePercentage">--</span>
+                                </div>
                             </div>
+                            <button onclick="generateEfficiencyReport()" class="report-btn">
+                                Сформировать отчет
+                            </button>
+                        </div>
+                        
+                        <!-- Отчет по типам работ -->
+                        <div class="report-card">
+                            <h3>Анализ типов работ</h3>
+                            <div class="report-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Плановые/Внеплановые:</span>
+                                    <span class="stat-value" id="workTypesRatio">--</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Самый загруженный город:</span>
+                                    <span class="stat-value" id="busyCity">--</span>
+                                </div>
+                            </div>
+                            <button onclick="generateWorkTypesReport()" class="report-btn">
+                                Сформировать отчет
+                            </button>
+                        </div>
+                        
+                        <!-- Отчет по специалистам -->
+                        <div class="report-card">
+                            <h3>Статистика специалистов</h3>
+                            <div class="report-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Всего специалистов:</span>
+                                    <span class="stat-value" id="totalSpecialists">--</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Работ на специалиста:</span>
+                                    <span class="stat-value" id="worksPerSpecialist">--</span>
+                                </div>
+                            </div>
+                            <button onclick="generateSpecialistsReport()" class="report-btn">
+                                Сформировать отчет
+                            </button>
                         </div>
                     </div>
-                </div>
-
-                <div class="calendar-view">
-                    <div class="calendar-header">
-                        <button onclick="prevMonth()">&lt;</button>
-                        <h3 id="currentMonth">Март 2024</h3>
-                        <button onclick="nextMonth()">&gt;</button>
-                    </div>
-                    <div class="calendar-grid" id="calendarGrid">
-                        <!-- Дни будут добавлены через JavaScript -->
-                    </div>
-                </div>
-
-                <div class="print-section">
-                    <button onclick="printReport()">
-                        <img src="icons/print.svg" alt="Печать">
-                        Распечатать отчет
-                    </button>
                 </div>
             </div>
         </div>
@@ -818,14 +852,28 @@
         }
 
         function showSection(sectionId) {
+            // Скрываем все секции
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.remove('active');
             });
-            document.getElementById(sectionId).classList.add('active');
             
-            // Если открыта секция ремонтных работ, загружаем список
-            if (sectionId === 'repairs') {
-                loadRepairs();
+            // Убираем активный класс со всех кнопок меню
+            document.querySelectorAll('.sidebar-menu button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Показываем выбранную секцию
+            document.getElementById(sectionId).classList.add('active');
+            document.querySelector(`button[onclick="showSection('${sectionId}')"]`).classList.add('active');
+            
+            // Если открыта секция городов, загружаем статистику
+            if (sectionId === 'cities') {
+                loadCitiesStats();
+            }
+            
+            // Если открыта секция отчетов, обновляем отчеты
+            if (sectionId === 'reports') {
+                updateReports();
             }
         }
 
@@ -1154,12 +1202,41 @@
         }
 
         // Функция отметки работы как завершенной
-        function markAsResolved(index) {
+        async function markAsResolved(index) {
             let works = JSON.parse(localStorage.getItem('works')) || [];
-            works[index].resolved = true;
+            const work = works[index];
+            
+            // Обновляем данные о работе
+            work.resolved = true;
+            work.endDate = new Date().toISOString();
+            works[index] = work;
             localStorage.setItem('works', JSON.stringify(works));
+            
+            try {
+                // Формируем сообщение о завершении работ
+                const completionMessage = {
+                    city: work.city,
+                    streets: work.streets,
+                    houses: work.houses,
+                    isEmergency: work.isEmergency,
+                    startDate: work.startDate,
+                    endDate: work.endDate,
+                    messageType: 'completion',
+                    completedAt: work.endDate
+                };
+                
+                // Отправляем уведомление в Telegram
+                const notificationSent = await sendTelegramNotification(completionMessage);
+                
+                if (!notificationSent) {
+                    console.warn('Не удалось отправить уведомление о завершении работ');
+                }
+            } catch (error) {
+                console.error('Ошибка при отправке уведомления:', error);
+            }
+            
             loadRepairs();
-            updateDashboard();
+            loadCitiesStats(); // Обновляем статистику
         }
 
         // Функция удаления работы
@@ -1265,6 +1342,154 @@
                 };
                 reader.readAsDataURL(file);
             }
+        }
+
+        // Функция генерации отчета по эффективности
+        function generateEfficiencyReport() {
+            const works = JSON.parse(localStorage.getItem('works')) || [];
+            
+            // Считаем среднее время выполнения
+            const completedWorks = works.filter(w => w.resolved);
+            const avgTime = completedWorks.reduce((acc, work) => {
+                const start = new Date(work.startDate);
+                const end = new Date(work.endDate);
+                return acc + (end - start);
+            }, 0) / completedWorks.length;
+            
+            document.getElementById('avgCompletionTime').textContent = 
+                Math.round(avgTime / (1000 * 60 * 60)) + ' часов';
+            
+            // Считаем процент выполнения в срок
+            const onTimeWorks = completedWorks.filter(work => {
+                const end = new Date(work.endDate);
+                const planned = new Date(work.startDate);
+                planned.setDate(planned.getDate() + 2); // Предполагаем норму 2 дня
+                return end <= planned;
+            });
+            
+            const onTimePercentage = (onTimeWorks.length / completedWorks.length * 100).toFixed(1);
+            document.getElementById('onTimePercentage').textContent = onTimePercentage + '%';
+        }
+        
+        // Функция генерации отчета по типам работ
+        function generateWorkTypesReport() {
+            const works = JSON.parse(localStorage.getItem('works')) || [];
+            
+            // Считаем соотношение типов работ
+            const planned = works.filter(w => !w.isEmergency).length;
+            const emergency = works.filter(w => w.isEmergency).length;
+            document.getElementById('workTypesRatio').textContent = 
+                `${planned}/${emergency}`;
+            
+            // Находим самый загруженный город
+            const cityStats = {};
+            works.forEach(work => {
+                cityStats[work.city] = (cityStats[work.city] || 0) + 1;
+            });
+            
+            const busyCity = Object.entries(cityStats)
+                .sort((a, b) => b[1] - a[1])[0];
+            document.getElementById('busyCity').textContent = 
+                `${busyCity[0]} (${busyCity[1]} работ)`;
+        }
+        
+        // Функция генерации отчета по специалистам
+        function generateSpecialistsReport() {
+            const specialists = JSON.parse(localStorage.getItem('specialists')) || [];
+            const works = JSON.parse(localStorage.getItem('works')) || [];
+            
+            document.getElementById('totalSpecialists').textContent = 
+                specialists.length;
+            
+            const avgWorks = (works.length / specialists.length).toFixed(1);
+            document.getElementById('worksPerSpecialist').textContent = 
+                avgWorks;
+        }
+        
+        // Обновляем все отчеты при открытии раздела
+        function updateReports() {
+            generateEfficiencyReport();
+            generateWorkTypesReport();
+            generateSpecialistsReport();
+        }
+
+        // Функция переключения вкладок внутри секции
+        function switchView(viewId) {
+            // Скрываем все вкладки
+            document.querySelectorAll('.tab-content').forEach(view => {
+                view.classList.remove('active');
+            });
+            
+            // Убираем активный класс со всех кнопок
+            document.querySelectorAll('.tab-buttons button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Показываем выбранную вкладку
+            document.getElementById(viewId).classList.add('active');
+            document.querySelector(`button[onclick="switchView('${viewId}')"]`).classList.add('active');
+            
+            // Если выбрана карта, инициализируем её
+            if (viewId === 'mapView') {
+                const mapContainer = document.getElementById('statsMap');
+                if (!mapContainer) return;
+                
+                ymaps.ready(() => {
+                    const map = new ymaps.Map(mapContainer, {
+                        center: [55.76, 37.64],
+                        zoom: 5,
+                        controls: ['zoomControl']
+                    });
+                    
+                    const works = JSON.parse(localStorage.getItem('works')) || [];
+                    const cityStats = calculateCityStats(works);
+                    
+                    Object.entries(cityStats).forEach(([city, stats]) => {
+                        ymaps.geocode(city).then(result => {
+                            const coords = result.geoObjects.get(0).geometry.getCoordinates();
+                            const placemark = new ymaps.Placemark(coords, {
+                                balloonContent: `
+                                    <div class="map-balloon">
+                                        <h3>${city}</h3>
+                                        <p>Всего работ: ${stats.total}</p>
+                                        <p>Плановых: ${stats.planned}</p>
+                                        <p>Внеплановых: ${stats.emergency}</p>
+                                        <p>Завершено: ${stats.completed}</p>
+                                    </div>
+                                `
+                            });
+                            map.geoObjects.add(placemark);
+                        });
+                    });
+                });
+            }
+        }
+
+        // Вспомогательная функция для подсчета статистики по городам
+        function calculateCityStats(works) {
+            const cityStats = {};
+            works.forEach(work => {
+                if (!cityStats[work.city]) {
+                    cityStats[work.city] = {
+                        planned: 0,
+                        emergency: 0,
+                        total: 0,
+                        completed: 0
+                    };
+                }
+                
+                if (work.isEmergency) {
+                    cityStats[work.city].emergency++;
+                } else {
+                    cityStats[work.city].planned++;
+                }
+                
+                cityStats[work.city].total++;
+                if (work.resolved) {
+                    cityStats[work.city].completed++;
+                }
+            });
+            return cityStats;
         }
     </script>
 </body>
