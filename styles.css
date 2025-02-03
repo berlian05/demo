@@ -665,4 +665,171 @@ tr:hover {
     background: var(--primary-color);
     color: white;
     border-color: var(--primary-color);
+}
+
+/* Стили для карточек работ */
+.work-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-left: 4px solid var(--primary-color);
+}
+
+.work-card.emergency {
+    border-left-color: var(--error-color);
+}
+
+.work-card.completed {
+    border-left-color: var(--success-color);
+}
+
+/* Иконки статусов */
+.status-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* Анимации для элементов */
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Статистика и графики */
+.dashboard-section {
+    margin-top: 2rem;
+}
+
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stats-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stats-icon {
+    width: 48px;
+    height: 48px;
+    margin-right: 1rem;
+    padding: 12px;
+    border-radius: 12px;
+    background: #e8f5e9;
+}
+
+.stats-icon.emergency {
+    background: #ffebee;
+}
+
+.stats-info h3 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.stats-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0.5rem 0;
+}
+
+.stats-change {
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+.stats-change.positive {
+    color: #4caf50;
+}
+
+.stats-change.negative {
+    color: #f44336;
+}
+
+/* Графики */
+.charts-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.chart-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Фотогалерея */
+.photos-section {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.photo-upload-area {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.upload-button, .camera-button {
+    padding: 0.8rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.upload-button {
+    background: var(--primary-color);
+    color: white;
+}
+
+.camera-button {
+    background: #e3f2fd;
+    color: var(--primary-color);
+}
+
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.photo-item {
+    position: relative;
+    padding-bottom: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.photo-item img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 } 

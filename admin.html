@@ -6,6 +6,7 @@
     <title>Панель администратора</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://api-maps.yandex.ru/2.1/?apikey=d02b961f-9aa6-4145-902a-0bf32770dc0c&lang=ru_RU" type="text/javascript"></script>
+    <script src="telegram.js"></script>
     <style>
         .admin-panel {
             display: grid;
@@ -148,21 +149,33 @@
         }
 
         .street-entry {
-            display: grid;
-            grid-template-columns: 2fr 3fr auto auto;
+            display: flex;
             gap: 1rem;
+            align-items: flex-start;
             margin-bottom: 1rem;
-            align-items: start;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .address-inputs {
+            flex: 1;
+        }
+
+        .address-buttons {
+            display: flex;
+            gap: 0.5rem;
         }
 
         .houses-container {
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
+            margin-top: 0.5rem;
         }
 
         .houses-container input {
-            width: 120px;
+            width: 150px;
         }
 
         .small-btn {
@@ -283,6 +296,255 @@
             color: white;
             border-color: var(--primary-color);
         }
+
+        .ymaps-2-1-79-suggest-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .ymaps-2-1-79-suggest-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .ymaps-2-1-79-suggest {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        .progress-section {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .progress-cards {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .progress-card {
+            flex: 1;
+            padding: 1rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .progress-circle {
+            position: relative;
+            width: 100%;
+            padding-bottom: 100%;
+            border-radius: 50%;
+            background: #f0f0f0;
+        }
+
+        .progress-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--primary-color);
+        }
+
+        .progress-info {
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .progress-info h4 {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        .progress-info p {
+            font-size: 0.9rem;
+        }
+
+        .filters-section {
+            margin-bottom: 2rem;
+        }
+
+        .filter-chips {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chip {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid #ddd;
+        }
+
+        .chip.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .calendar-view {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .calendar-header button {
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .calendar-grid div {
+            padding: 0.5rem;
+            text-align: center;
+            background: #f5f5f5;
+            border-radius: var(--border-radius);
+        }
+
+        .calendar-grid div.today {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Стили для карточек работ */
+        .work-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .work-card.emergency {
+            border-left-color: var(--error-color);
+        }
+
+        .work-card.completed {
+            border-left-color: var(--success-color);
+        }
+
+        /* Иконки статусов */
+        .status-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        /* Анимации для элементов */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Статистика и графики */
+        .dashboard-section {
+            margin-top: 2rem;
+        }
+
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stats-icon {
+            width: 48px;
+            height: 48px;
+            margin-right: 1rem;
+            padding: 12px;
+            border-radius: 12px;
+            background: #e8f5e9;
+        }
+
+        .stats-icon.emergency {
+            background: #ffebee;
+        }
+
+        .stats-info h3 {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .stats-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .stats-change {
+            font-size: 0.8rem;
+            margin: 0;
+        }
+
+        .stats-change.positive {
+            color: #4caf50;
+        }
+
+        .stats-change.negative {
+            color: #f44336;
+        }
+
+        /* Фотогалерея */
+        .photos-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .photo-upload-area {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .upload-button, .camera-button {
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+        }
     </style>
 </head>
 <body>
@@ -297,200 +559,141 @@
         <div class="admin-panel">
             <div class="sidebar">
                 <ul class="sidebar-menu">
-                    <li><button onclick="showSection('management')" class="active">Управление</button></li>
                     <li><button onclick="showSection('repairs')" class="active">Ремонтные работы</button></li>
+                    <li><button onclick="showSection('specialists')">Специалисты</button></li>
                     <li><button onclick="showSection('cities')">Города</button></li>
                     <li><button onclick="showSection('reports')">Отчеты</button></li>
+                    <li><button onclick="sendTestMessage()">Тестовое уведомление</button></li>
                 </ul>
             </div>
 
             <div class="content" id="mainContent">
-                <!-- Секция управления -->
-                <div id="management" class="section active">
-                    <div class="tab-buttons">
-                        <button onclick="showTab('specialists')" class="active">Специалисты</button>
-                        <button onclick="showTab('organizations')">Организации</button>
-                    </div>
-
-                    <!-- Вкладка специалистов -->
-                    <div id="specialists" class="tab active">
-                        <h2>Управление специалистами</h2>
-                        <button onclick="showAddSpecialistForm()" class="add-btn">Добавить специалиста</button>
-                        
-                        <div class="add-specialist-form" id="addSpecialistForm" style="display: none;">
-                            <h3>Добавить нового специалиста</h3>
-                            <form onsubmit="addSpecialist(event)">
-                                <input type="text" name="name" placeholder="ФИО" required>
-                                <input type="text" name="username" placeholder="Логин" required>
-                                <input type="password" name="password" placeholder="Пароль" required>
-                                <select name="organization" required>
-                                    <option value="">Выберите организацию</option>
-                                    <!-- Организации будут добавлены через JavaScript -->
-                                </select>
-                                <div class="city-rights">
-                                    <label>
-                                        <input type="checkbox" value="moscow"> Москва
-                                    </label>
-                                    <label>
-                                        <input type="checkbox" value="spb"> Санкт-Петербург
-                                    </label>
-                                </div>
-                                <button type="submit">Сохранить</button>
-                            </form>
-                        </div>
-
-                        <table class="specialist-list">
-                            <thead>
-                                <tr>
-                                    <th>ФИО</th>
-                                    <th>Логин</th>
-                                    <th>Организация</th>
-                                    <th>Города</th>
-                                    <th>Действия</th>
-                                </tr>
-                            </thead>
-                            <tbody id="specialistsList">
-                                <!-- Список специалистов будет добавлен через JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Вкладка организаций -->
-                    <div id="organizations" class="tab" style="display: none;">
-                        <h2>Управление организациями</h2>
-                        <button onclick="showAddOrganizationForm()" class="add-btn">Добавить организацию</button>
-
-                        <div class="add-organization-form" id="addOrganizationForm" style="display: none;">
-                            <h3>Добавить новую организацию</h3>
-                            <form onsubmit="addOrganization(event)">
-                                <input type="text" name="name" placeholder="Название организации" required>
-                                <select name="type" required>
-                                    <option value="">Выберите тип организации</option>
-                                    <option value="mup">МУП</option>
-                                    <option value="tszh">ТСЖ</option>
-                                    <option value="uk">Управляющая компания</option>
-                                    <option value="other">Другое</option>
-                                </select>
-                                <div class="city-rights">
-                                    <label>
-                                        <input type="checkbox" value="moscow"> Москва
-                                    </label>
-                                    <label>
-                                        <input type="checkbox" value="spb"> Санкт-Петербург
-                                    </label>
-                                </div>
-                                <button type="submit">Сохранить</button>
-                            </form>
-                        </div>
-
-                        <table class="organization-list">
-                            <thead>
-                                <tr>
-                                    <th>Название</th>
-                                    <th>Тип</th>
-                                    <th>Города</th>
-                                    <th>Количество специалистов</th>
-                                    <th>Действия</th>
-                                </tr>
-                            </thead>
-                            <tbody id="organizationsList">
-                                <!-- Список организаций будет добавлен через JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
                 <!-- Секция ремонтных работ -->
-                <div id="repairs" class="section">
+                <div id="repairs" class="section active">
                     <h2>Управление ремонтными работами</h2>
                     <button onclick="showAddRepairForm()" class="add-btn">Добавить ремонтные работы</button>
-
-                    <div class="add-repair-form" id="addRepairForm" style="display: none;">
-                        <h3>Добавить новые ремонтные работы</h3>
+                    
+                    <!-- Форма добавления работы -->
+                    <div id="repairForm" style="display: none;">
+                        <h3>Добавление ремонтной работы</h3>
                         <form onsubmit="addRepair(event)" class="repair-form">
                             <div class="form-group">
-                                <label>Тип отключения</label>
-                                <div class="radio-group">
-                                    <label>
-                                        <input type="radio" name="type" value="planned" required> Плановое
-                                    </label>
-                                    <label>
-                                        <input type="radio" name="type" value="emergency" required> Внеплановое
-                                    </label>
-                                </div>
+                                <label>Регион:</label>
+                                <select id="repairRegion" onchange="updateRepairCities()" required>
+                                    <option value="">Выберите область</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Город:</label>
+                                <select id="repairCity" required>
+                                    <option value="">Сначала выберите область</option>
+                                </select>
                             </div>
 
-                            <div class="location-selects">
-                                <select id="repairFederalDistrict" onchange="updateRepairRegions()" required>
-                                    <option value="">Выберите федеральный округ</option>
-                                </select>
-                                
-                                <select id="repairRegion" onchange="updateRepairCities()" required>
-                                    <option value="">Выберите регион</option>
-                                </select>
-                                
-                                <select id="repairCity" required>
-                                    <option value="">Выберите город</option>
-                                </select>
+                            <div class="form-group">
+                                <label>Тип работ:</label>
+                                <div class="radio-group">
+                                    <label>
+                                        <input type="radio" name="type" value="planned" checked>
+                                        Плановые работы
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="type" value="emergency">
+                                        Внеплановые работы
+                                    </label>
+                                </div>
                             </div>
 
                             <div class="streets-section">
-                                <h4>Улицы и дома</h4>
-                                <div id="streetsContainer">
-                                    <div class="street-entry">
-                                        <input type="text" name="streets[]" placeholder="Название улицы" required>
-                                        <div class="houses-container">
-                                            <input type="text" name="houses[]" placeholder="Номер дома" required>
-                                        </div>
-                                        <button type="button" onclick="addHouse(this)" class="small-btn">+ Дом</button>
-                                    </div>
-                                </div>
-                                <button type="button" onclick="addStreet()" class="small-btn">+ Улица</button>
+                                <h4>Адреса</h4>
+                                <div id="streetsContainer"></div>
+                                <button type="button" onclick="addStreetEntry()" class="small-btn">+ Добавить улицу</button>
                             </div>
 
                             <div class="form-group">
-                                <label>Дата и время отключения</label>
+                                <label>Дата и время начала:</label>
                                 <input type="datetime-local" name="startDate" required>
                             </div>
 
                             <div class="form-group">
                                 <label>
-                                    <input type="checkbox" name="hasEndDate" onchange="toggleEndDate(this)">
-                                    Указать время окончания работ
+                                    <input type="checkbox" name="hasEndDate" onchange="document.getElementById('endDate').disabled = !this.checked">
+                                    Указать время окончания
                                 </label>
-                                <input type="datetime-local" name="endDate" id="endDate" style="display: none;">
+                                <input type="datetime-local" name="endDate" id="endDate" disabled>
                             </div>
 
                             <div class="form-buttons">
-                                <button type="submit" class="submit-btn">
-                                    <span>Сохранить</span>
-                                </button>
-                                <button type="button" onclick="showAddRepairForm()" class="cancel-btn">
-                                    <span>Отмена</span>
-                                </button>
+                                <button type="submit" class="submit-btn">Добавить работу</button>
+                                <button type="reset" class="cancel-btn" onclick="showAddRepairForm()">Отмена</button>
                             </div>
                         </form>
                     </div>
 
-                    <div class="repairs-list">
-                        <h3>Текущие ремонтные работы</h3>
-                        <table class="repairs-table">
-                            <thead>
-                                <tr>
-                                    <th>Тип</th>
-                                    <th>Город</th>
-                                    <th>Адрес</th>
-                                    <th>Начало работ</th>
-                                    <th>Окончание работ</th>
-                                    <th>Статус</th>
-                                    <th>Действия</th>
-                                </tr>
-                            </thead>
-                            <tbody id="repairsList">
-                                <!-- Список работ будет добавлен через JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
+                    <!-- Таблица работ -->
+                    <table class="repairs-table">
+                        <thead>
+                            <tr>
+                                <th>Тип</th>
+                                <th>Город</th>
+                                <th>Адрес</th>
+                                <th>Начало</th>
+                                <th>Окончание</th>
+                                <th>Статус</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="repairsList">
+                            <!-- Список работ будет добавлен через JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Секция специалистов -->
+                <div id="specialists" class="section">
+                    <h2>Управление специалистами</h2>
+                    <button onclick="showAddSpecialistForm()" class="add-btn">Добавить специалиста</button>
+                    
+                    <form id="addSpecialistForm" style="display: none;" class="add-specialist-form" onsubmit="addSpecialist(event)">
+                        <div class="form-group">
+                            <label>ФИО:</label>
+                            <input type="text" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Логин:</label>
+                            <input type="text" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Пароль:</label>
+                            <input type="password" name="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Организация:</label>
+                            <select name="organization" required>
+                                <option value="">Выберите организацию</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Доступные города:</label>
+                            <div class="city-rights"></div>
+                        </div>
+                        <button type="submit">Добавить</button>
+                        <button type="button" onclick="showAddSpecialistForm()">Отмена</button>
+                    </form>
+
+                    <table class="specialist-list">
+                        <thead>
+                            <tr>
+                                <th>ФИО</th>
+                                <th>Логин</th>
+                                <th>Организация</th>
+                                <th>Города</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="specialistsList"></tbody>
+                    </table>
                 </div>
 
                 <!-- Секция городов -->
@@ -542,6 +745,24 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="calendar-view">
+                    <div class="calendar-header">
+                        <button onclick="prevMonth()">&lt;</button>
+                        <h3 id="currentMonth">Март 2024</h3>
+                        <button onclick="nextMonth()">&gt;</button>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- Дни будут добавлены через JavaScript -->
+                    </div>
+                </div>
+
+                <div class="print-section">
+                    <button onclick="printReport()">
+                        <img src="icons/print.svg" alt="Печать">
+                        Распечатать отчет
+                    </button>
+                </div>
             </div>
         </div>
     </main>
@@ -568,7 +789,7 @@
             }
 
             // Показываем секцию управления по умолчанию
-            showSection('management');
+            showSection('repairs');
             
             // Загружаем все данные
             loadOrganizations();
@@ -599,30 +820,12 @@
         function showSection(sectionId) {
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.remove('active');
-                section.style.display = 'none';
             });
-            const selectedSection = document.getElementById(sectionId);
-            if (selectedSection) {
-            selectedSection.classList.add('active');
-            selectedSection.style.display = 'block';
-            }
+            document.getElementById(sectionId).classList.add('active');
             
-            document.querySelectorAll('.sidebar-menu button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            const activeButton = document.querySelector(`button[onclick="showSection('${sectionId}')"]`);
-            if (activeButton) {
-                activeButton.classList.add('active');
-            }
-
-            // Если открыта секция ремонтных работ, загружаем данные
+            // Если открыта секция ремонтных работ, загружаем список
             if (sectionId === 'repairs') {
                 loadRepairs();
-            }
-
-            // Загружаем статистику при переходе на вкладку городов
-            if (sectionId === 'cities') {
-                loadCitiesStats();
             }
         }
 
@@ -649,104 +852,13 @@
             localStorage.setItem('specialists', JSON.stringify(specialists));
         }
 
-        // Обновим функцию добавления организации
-        function addOrganization(event) {
-            event.preventDefault();
-            const form = event.target;
-            const name = form.name.value;
-            const type = form.type.value;
-            const cities = Array.from(form.querySelectorAll('input[type="checkbox"]:checked'))
-                .map(cb => cb.value);
-
-            const newOrganization = {
-                id: organizations.length + 1,
-                name,
-                type,
-                cities,
-                specialists: 0
-            };
-
-            organizations.push(newOrganization);
-            saveOrganizations();
-            loadOrganizations();
-            form.reset();
-            showAddOrganizationForm();
-        }
-
-        // Обновим функцию добавления специалиста
-        function addSpecialist(event) {
-            event.preventDefault();
-            const form = event.target;
-            const name = form.name.value;
-            const organization = form.organization.value;
-            const cities = Array.from(form.querySelectorAll('input[type="checkbox"]:checked'))
-                .map(cb => cb.value);
-
-            const newSpecialist = {
-                id: specialists.length + 1,
-                name,
-                organization,
-                cities,
-                active: true
-            };
-
-            specialists.push(newSpecialist);
-            
-            // Обновляем счетчик специалистов в организации
-            const org = organizations.find(o => o.id === parseInt(organization));
-            if (org) {
-                org.specialists++;
-                saveOrganizations();
-            }
-
-            saveSpecialists();
-            loadSpecialists();
-            form.reset();
-            showAddSpecialistForm();
-        }
-
-        // Функция удаления организации
-        function deleteOrganization(id) {
-            if (confirm('Вы уверены? Это также удалит всех специалистов организации.')) {
-                // Удаляем специалистов организации
-                specialists = specialists.filter(s => s.organization !== id);
-                saveSpecialists();
-                
-                // Удаляем организацию
-                organizations = organizations.filter(o => o.id !== id);
-                saveOrganizations();
-                
-                loadOrganizations();
-                loadSpecialists();
-            }
-        }
-
-        // Функция удаления специалиста
-        function deleteSpecialist(id) {
-            if (confirm('Вы уверены?')) {
-                const specialist = specialists.find(s => s.id === id);
-                if (specialist) {
-                    // Уменьшаем счетчик специалистов в организации
-                    const org = organizations.find(o => o.id === parseInt(specialist.organization));
-                    if (org) {
-                        org.specialists--;
-                        saveOrganizations();
-                    }
-                }
-                
-                specialists = specialists.filter(s => s.id !== id);
-                saveSpecialists();
-                loadSpecialists();
-            }
-        }
-
-        // Функция загрузки организаций
+        // Функции для работы с организациями
         function loadOrganizations() {
-            const tbody = document.querySelector('.organization-list tbody');
+            const tbody = document.getElementById('organizationsList');
             if (!tbody) return;
-
+            
             tbody.innerHTML = '';
-            organizations.forEach(org => {
+            organizations.forEach((org, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${org.name}</td>
@@ -754,58 +866,81 @@
                     <td>${org.cities.join(', ')}</td>
                     <td>${org.specialists}</td>
                     <td>
-                        <button onclick="deleteOrganization(${org.id})" class="delete-btn">Удалить</button>
+                        <button onclick="editOrganization(${index})">Изменить</button>
+                        <button onclick="deleteOrganization(${index})" class="delete-btn">Удалить</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
 
-            // Обновляем список организаций в форме добавления специалиста
+            // Обновляем список организаций в форме специалистов
             const orgSelect = document.querySelector('select[name="organization"]');
             if (orgSelect) {
                 orgSelect.innerHTML = '<option value="">Выберите организацию</option>';
                 organizations.forEach(org => {
-                    const option = document.createElement('option');
-                    option.value = org.id;
-                    option.textContent = org.name;
-                    orgSelect.appendChild(option);
+                    orgSelect.innerHTML += `<option value="${org.id}">${org.name}</option>`;
                 });
             }
         }
 
-        // Функция загрузки специалистов
-        function loadSpecialists() {
-            const tbody = document.querySelector('.specialist-list tbody');
-            if (!tbody) return;
+        function addOrganization(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const newOrg = {
+                id: organizations.length + 1,
+                name: formData.get('name'),
+                type: formData.get('type'),
+                cities: Array.from(event.target.querySelectorAll('input[name="cities"]:checked')).map(input => input.value),
+                specialists: 0
+            };
+            organizations.push(newOrg);
+            localStorage.setItem('organizations', JSON.stringify(organizations));
+            loadOrganizations();
+            event.target.reset();
+            showAddOrganizationForm();
+        }
 
+        // Функции для работы со специалистами
+        function loadSpecialists() {
+            const tbody = document.getElementById('specialistsList');
+            if (!tbody) return;
+            
             tbody.innerHTML = '';
-            specialists.forEach(spec => {
-                const org = organizations.find(o => o.id === parseInt(spec.organization));
+            const specialists = JSON.parse(localStorage.getItem('specialists')) || [];
+            specialists.forEach((spec, index) => {
+                const org = organizations.find(o => o.id === spec.organizationId);
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${spec.name}</td>
+                    <td>${spec.username}</td>
                     <td>${org ? org.name : 'Не указана'}</td>
                     <td>${spec.cities.join(', ')}</td>
-                    <td>${spec.active ? 'Активен' : 'Не активен'}</td>
                     <td>
-                        <button onclick="toggleSpecialistStatus(${spec.id})" class="status-btn">
-                            ${spec.active ? 'Деактивировать' : 'Активировать'}
-                        </button>
-                        <button onclick="deleteSpecialist(${spec.id})" class="delete-btn">Удалить</button>
+                        <button onclick="editSpecialist(${index})">Изменить</button>
+                        <button onclick="deleteSpecialist(${index})" class="delete-btn">Удалить</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // Функция изменения статуса специалиста
-        function toggleSpecialistStatus(id) {
-            const specialist = specialists.find(s => s.id === id);
-            if (specialist) {
-                specialist.active = !specialist.active;
-                saveSpecialists();
-                loadSpecialists();
-            }
+        function addSpecialist(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const specialists = JSON.parse(localStorage.getItem('specialists')) || [];
+            const newSpec = {
+                name: formData.get('name'),
+                username: formData.get('username'),
+                password: formData.get('password'),
+                organizationId: parseInt(formData.get('organization')),
+                cities: Array.from(event.target.querySelectorAll('input[name="cities"]:checked')).map(input => input.value),
+                role: 'specialist'
+            };
+            specialists.push(newSpec);
+            localStorage.setItem('specialists', JSON.stringify(specialists));
+            loadSpecialists();
+            event.target.reset();
+            showAddSpecialistForm();
         }
 
         function logout() {
@@ -813,81 +948,111 @@
             window.location.href = 'index.html';
         }
 
-        // Добавляем новые функции для работы с ремонтными работами
-        function showAddRepairForm() {
-            const form = document.getElementById('addRepairForm');
-            form.style.display = form.style.display === 'none' ? 'block' : 'none';
-            
-            if (form.style.display === 'block') {
-                // Заполняем списки при открытии формы
-                const federalDistrictSelect = document.getElementById('repairFederalDistrict');
-                federalDistrictSelect.innerHTML = '<option value="">Выберите федеральный округ</option>';
-                
-                for (const [key, district] of Object.entries(russianRegions)) {
-                    const option = document.createElement('option');
-                    option.value = key;
-                    option.textContent = district.name;
-                    federalDistrictSelect.appendChild(option);
-                }
-            }
-        }
-
-        function updateRepairRegions() {
-            const federalDistrictSelect = document.getElementById('repairFederalDistrict');
+        // Обновляем функцию initRepairForm
+        function initRepairForm() {
             const regionSelect = document.getElementById('repairRegion');
             const citySelect = document.getElementById('repairCity');
             
-            regionSelect.innerHTML = '<option value="">Выберите регион</option>';
-            citySelect.innerHTML = '<option value="">Выберите город</option>';
+            if (!regionSelect || !citySelect) return;
             
-            const selectedDistrict = federalDistrictSelect.value;
-            if (!selectedDistrict) return;
+            // Очищаем списки
+            regionSelect.innerHTML = '<option value="">Выберите область</option>';
+            citySelect.innerHTML = '<option value="">Сначала выберите область</option>';
             
-            const regions = russianRegions[selectedDistrict].regions;
-            for (const [key, region] of Object.entries(regions)) {
+            // Заполняем список областей
+            for (const [key, region] of Object.entries(russianRegions)) {
                 const option = document.createElement('option');
                 option.value = key;
                 option.textContent = region.name;
                 regionSelect.appendChild(option);
             }
-        }
-
-        function updateRepairCities() {
-            const federalDistrictSelect = document.getElementById('repairFederalDistrict');
-            const regionSelect = document.getElementById('repairRegion');
-            const citySelect = document.getElementById('repairCity');
             
-            citySelect.innerHTML = '<option value="">Выберите город</option>';
-            
-            const selectedDistrict = federalDistrictSelect.value;
-            const selectedRegion = regionSelect.value;
-            if (!selectedDistrict || !selectedRegion) return;
-            
-            const cities = russianRegions[selectedDistrict].regions[selectedRegion].cities;
-            cities.forEach(city => {
-                const option = document.createElement('option');
-                option.value = city.toLowerCase().replace(/\s+/g, '_');
-                option.textContent = city;
-                citySelect.appendChild(option);
+            // Обработчик изменения области
+            regionSelect.addEventListener('change', function() {
+                const selectedRegion = this.value;
+                citySelect.innerHTML = '<option value="">Выберите город</option>';
+                
+                if (selectedRegion && russianRegions[selectedRegion]) {
+                    const cities = russianRegions[selectedRegion].cities;
+                    cities.forEach(city => {
+                        const option = document.createElement('option');
+                        option.value = city.toLowerCase().replace(/\s+/g, '_');
+                        option.textContent = city;
+                        citySelect.appendChild(option);
+                    });
+                }
             });
         }
 
-        function addStreet() {
-            const container = document.getElementById('streetsContainer');
-            const streetDiv = document.createElement('div');
-            streetDiv.className = 'street-entry';
-            streetDiv.innerHTML = `
-                <input type="text" name="streets[]" placeholder="Название улицы" required>
-                <div class="houses-container">
-                    <input type="text" name="houses[]" placeholder="Номер дома" required>
-                </div>
-                <button type="button" onclick="addHouse(this)" class="small-btn">+ Дом</button>
-            `;
-            container.appendChild(streetDiv);
+        // Инициализация API при загрузке страницы
+        ymaps.ready(function() {
+            console.log('Yandex Maps API готов к использованию');
+            initAddressAutocomplete();
+        });
+
+        // Обновленная функция инициализации подсказок
+        function initAddressAutocomplete() {
+            const streetsContainer = document.getElementById('streetsContainer');
+            if (!streetsContainer) return;
+
+            // Добавляем обработчик для новых полей адреса
+            streetsContainer.addEventListener('input', function(e) {
+                if (e.target.name === 'streets[]') {
+                    const selectedCity = document.querySelector('#repairCity option:checked').textContent;
+                    if (!selectedCity) {
+                        alert('Сначала выберите город');
+                        return;
+                    }
+
+                    // Создаем подсказки для поля
+                    if (!e.target.suggestView) {
+                        e.target.suggestView = new ymaps.SuggestView(e.target, {
+                            provider: {
+                                suggest: (request, options) => {
+                                    return ymaps.suggest(`${selectedCity}, ${request}`);
+                                }
+                            }
+                        });
+
+                        // Обработчик выбора подсказки
+                        e.target.suggestView.events.add('select', function(event) {
+                            const value = event.get('item').value;
+                            console.log('Выбран адрес:', value);
+                            
+                            // Получаем только название улицы
+                            const parts = value.split(',');
+                            if (parts.length > 1) {
+                                e.target.value = parts[1].trim();
+                            }
+                        });
+                    }
+                }
+            });
         }
 
-        function addHouse(button) {
-            const housesContainer = button.previousElementSibling;
+        // Обновляем функцию добавления строки адреса
+        function addStreetEntry() {
+            const container = document.getElementById('streetsContainer');
+            const div = document.createElement('div');
+            div.className = 'street-entry';
+            div.innerHTML = `
+                <div class="address-inputs">
+                    <input type="text" name="streets[]" placeholder="Начните вводить название улицы" required>
+                    <div class="houses-container">
+                        <input type="text" name="houses[]" placeholder="Номер дома" required>
+                    </div>
+                </div>
+                <div class="address-buttons">
+                    <button type="button" class="small-btn" onclick="addHouseInput(this.parentElement.parentElement)">+ Дом</button>
+                    <button type="button" class="small-btn remove-btn" onclick="this.parentElement.parentElement.remove()">Удалить</button>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        // Обновляем функцию добавления дома
+        function addHouseInput(streetEntry) {
+            const housesContainer = streetEntry.querySelector('.houses-container');
             const input = document.createElement('input');
             input.type = 'text';
             input.name = 'houses[]';
@@ -896,77 +1061,77 @@
             housesContainer.appendChild(input);
         }
 
-        function toggleEndDate(checkbox) {
-            const endDateInput = document.getElementById('endDate');
-            endDateInput.style.display = checkbox.checked ? 'block' : 'none';
-            endDateInput.required = checkbox.checked;
+        // Обновим функцию showAddRepairForm
+        function showAddRepairForm() {
+            const form = document.getElementById('repairForm');
+            if (form.style.display === 'none' || !form.style.display) {
+                form.style.display = 'block';
+                // Инициализируем список городов
+                initRepairForm();
+                // Инициализируем подсказки адресов
+                ymaps.ready(() => {
+                    initAddressAutocomplete();
+                    // Добавляем первую строку для улицы и дома
+                    const container = document.getElementById('streetsContainer');
+                    if (!container.children.length) {
+                        addStreetEntry();
+                    }
+                });
+            } else {
+                form.style.display = 'none';
+            }
         }
 
-        function addRepair(event) {
+        // Обновим функцию проверки адреса в addRepair
+        async function addRepair(event) {
             event.preventDefault();
-            console.log('Adding repair...'); // Для отладки
-
+            
             const form = event.target;
             const formData = new FormData(form);
+            const selectedCity = document.querySelector('#repairCity option:checked').textContent;
 
-            const citySelect = document.getElementById('repairCity');
-            if (!citySelect || citySelect.selectedIndex === -1) {
-                alert('Пожалуйста, выберите город');
-                return;
-            }
+            try {
+                // Собираем данные о работе
+                const repair = {
+                    city: selectedCity,
+                    streets: Array.from(form.querySelectorAll('input[name="streets[]"]')).map(input => input.value),
+                    houses: Array.from(form.querySelectorAll('input[name="houses[]"]')).map(input => input.value),
+                    isEmergency: formData.get('type') === 'emergency',
+                    startDate: formData.get('startDate'),
+                    endDate: formData.get('hasEndDate') ? formData.get('endDate') : null,
+                    resolved: false,
+                    createdAt: new Date().toISOString()
+                };
 
-            const selectedCity = citySelect.options[citySelect.selectedIndex].textContent;
+                // Сохраняем работу
+                let works = JSON.parse(localStorage.getItem('works')) || [];
+                works.push(repair);
+                localStorage.setItem('works', JSON.stringify(works));
 
-            const streets = [];
-            const houses = [];
-            form.querySelectorAll('.street-entry').forEach(streetEntry => {
-                const street = streetEntry.querySelector('input[name="streets[]"]').value;
-                const streetHouses = Array.from(streetEntry.querySelectorAll('input[name="houses[]"]'))
-                    .map(input => input.value);
-                if (street && streetHouses.length > 0) {
-                    streets.push(street);
-                    houses.push(...streetHouses);
+                // Отправляем уведомление в Telegram
+                const notificationSent = await sendTelegramNotification(repair);
+                
+                if (!notificationSent) {
+                    console.warn('Не удалось отправить уведомление в Telegram');
                 }
-            });
 
-            if (streets.length === 0 || houses.length === 0) {
-                alert('Пожалуйста, добавьте хотя бы одну улицу и дом');
-                return;
+                loadRepairs();
+                form.reset();
+                showAddRepairForm();
+                alert('Работа успешно добавлена!');
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Произошла ошибка при сохранении работы');
             }
-
-            const repair = {
-                city: selectedCity,
-                streets: streets,
-                houses: houses,
-                isEmergency: formData.get('type') === 'emergency',
-                startDate: formData.get('startDate'),
-                endDate: formData.get('hasEndDate') ? formData.get('endDate') : null,
-                resolved: false,
-                createdAt: new Date().toISOString()
-            };
-
-            console.log('New repair:', repair); // Для отладки
-
-            // Получаем текущие работы из localStorage
-            let works = JSON.parse(localStorage.getItem('works')) || [];
-            works.push(repair);
-            
-            // Сохраняем обновленный список работ
-            localStorage.setItem('works', JSON.stringify(works));
-            console.log('Works saved:', works); // Для отладки
-
-            loadRepairs();
-            form.reset();
-            showAddRepairForm();
         }
 
+        // Функция загрузки списка работ
         function loadRepairs() {
             const tbody = document.getElementById('repairsList');
             if (!tbody) return;
             
             tbody.innerHTML = '';
-            // Загружаем актуальные данные
-            works = JSON.parse(localStorage.getItem('works')) || [];
+            const works = JSON.parse(localStorage.getItem('works')) || [];
 
             works.forEach((repair, index) => {
                 const tr = document.createElement('tr');
@@ -988,176 +1153,119 @@
             });
         }
 
+        // Функция отметки работы как завершенной
         function markAsResolved(index) {
+            let works = JSON.parse(localStorage.getItem('works')) || [];
             works[index].resolved = true;
-            // Сохраняем в localStorage
             localStorage.setItem('works', JSON.stringify(works));
             loadRepairs();
+            updateDashboard();
         }
 
+        // Функция удаления работы
         function deleteRepair(index) {
             if (confirm('Вы уверены, что хотите удалить эту запись?')) {
+                let works = JSON.parse(localStorage.getItem('works')) || [];
                 works.splice(index, 1);
-                // Сохраняем в localStorage
                 localStorage.setItem('works', JSON.stringify(works));
                 loadRepairs();
+                updateDashboard();
             }
         }
-
-        const citiesData = [
-            { name: 'Москва', planned: 15, emergency: 8 },
-            { name: 'Санкт-Петербург', planned: 12, emergency: 6 },
-            { name: 'Новосибирск', planned: 8, emergency: 4 },
-            { name: 'Екатеринбург', planned: 10, emergency: 5 },
-            { name: 'Казань', planned: 7, emergency: 3 },
-            { name: 'Нижний Новгород', planned: 9, emergency: 4 },
-            { name: 'Челябинск', planned: 6, emergency: 3 },
-            { name: 'Самара', planned: 8, emergency: 5 },
-            { name: 'Уфа', planned: 7, emergency: 4 },
-            { name: 'Ростов-на-Дону', planned: 5, emergency: 2 }
-        ];
 
         function loadCitiesStats() {
             const tbody = document.getElementById('citiesList');
             if (!tbody) return;
 
             tbody.innerHTML = '';
+            const works = JSON.parse(localStorage.getItem('works')) || [];
             
-            citiesData.forEach(city => {
-                const total = city.planned + city.emergency;
-                const completed = Math.floor(Math.random() * total); // Случайное количество завершенных работ
+            // Группируем работы по городам
+            const cityStats = {};
+            works.forEach(work => {
+                if (!cityStats[work.city]) {
+                    cityStats[work.city] = {
+                        planned: 0,
+                        emergency: 0,
+                        total: 0,
+                        completed: 0
+                    };
+                }
                 
+                if (work.isEmergency) {
+                    cityStats[work.city].emergency++;
+                } else {
+                    cityStats[work.city].planned++;
+                }
+                
+                cityStats[work.city].total++;
+                if (work.resolved) {
+                    cityStats[work.city].completed++;
+                }
+            });
+
+            // Отображаем статистику
+            Object.entries(cityStats).forEach(([city, stats]) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${city.name}</td>
-                    <td>
-                        <div class="progress-bar">
-                            <div class="progress" style="width: ${(city.planned / 20) * 100}%"></div>
-                            <span>${city.planned}</span>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="progress-bar emergency">
-                            <div class="progress" style="width: ${(city.emergency / 10) * 100}%"></div>
-                            <span>${city.emergency}</span>
-                        </div>
-                    </td>
-                    <td>${total}</td>
-                    <td>
-                        <div class="progress-bar completed">
-                            <div class="progress" style="width: ${(completed / total) * 100}%"></div>
-                            <span>${completed} из ${total}</span>
-                        </div>
-                    </td>
+                    <td>${city}</td>
+                    <td>${stats.planned}</td>
+                    <td>${stats.emergency}</td>
+                    <td>${stats.total}</td>
+                    <td>${stats.completed}</td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        let map;
-        let markers = [];
-
-        function switchView(view) {
-            console.log('Переключение на вид:', view); // Отладка
-            
-            document.querySelectorAll('.view-content').forEach(el => {
-                el.style.display = 'none';
-            });
-            const viewElement = document.getElementById(`${view}View`);
-            if (viewElement) {
-                viewElement.style.display = 'block';
-            }
-            
-            document.querySelectorAll('.view-toggle button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.getElementById(`${view}ViewBtn`).classList.add('active');
-
-            if (view === 'map') {
-                console.log('Инициализация карты...'); // Отладка
-                ymaps.ready(() => {
-                    console.log('API Яндекс.Карт загружен'); // Отладка
-                    initMap();
-                }).catch(error => {
-                    console.error('Ошибка при загрузке API:', error);
-                });
-            }
+        // Вызываем обновление графиков при каждом изменении данных
+        function updateDashboard() {
+            initCharts();
         }
 
-        function initMap() {
-            console.log('Создание карты...'); // Отладка
-            
-            if (map) {
-                console.log('Карта уже создана'); // Отладка
-                return;
-            }
-
-            try {
-                map = new ymaps.Map('map', {
-                    center: [55.76, 37.64], // Координаты центра Москвы
-                    zoom: 11,
-                    controls: ['zoomControl', 'typeSelector', 'fullscreenControl']
-                });
-                
-                console.log('Карта успешно создана'); // Отладка
-
-                // Загружаем все ремонтные работы
-                const works = JSON.parse(localStorage.getItem('works')) || [];
-                console.log('Загружено работ:', works.length); // Отладка
-                
-                works.forEach(work => {
-                    // В реальном проекте здесь будет геокодинг адреса
-                    const lat = 55.76 + (Math.random() - 0.5) * 0.2;
-                    const lng = 37.64 + (Math.random() - 0.5) * 0.2;
-                    
-                    const marker = new ymaps.Placemark([lat, lng], {
-                        balloonContent: `
-                            <div class="map-balloon">
-                                <h3>${work.isEmergency ? 'Внеплановые' : 'Плановые'} работы</h3>
-                                <p>Адрес: ${work.streets.join(', ')} (дома: ${work.houses.join(', ')})</p>
-                                <p>Начало: ${new Date(work.startDate).toLocaleString()}</p>
-                                <p>Статус: ${work.resolved ? 'Завершено' : 'В работе'}</p>
-                            </div>
-                        `
-                    }, {
-                        preset: work.isEmergency ? 
-                               'islands#redDotIcon' : 
-                               work.resolved ? 
-                               'islands#greenDotIcon' : 
-                               'islands#blueDotIcon'
-                    });
-
-                    map.geoObjects.add(marker);
-                    markers.push({
-                        marker: marker,
-                        type: work.isEmergency ? 'emergency' : 'planned',
-                        completed: work.resolved
-                    });
-                });
-            } catch (error) {
-                console.error('Ошибка при создании карты:', error);
-            }
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type} fade-in`;
+            notification.innerHTML = `
+                <div class="notification-icon">
+                    ${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}
+                </div>
+                <div class="notification-message">${message}</div>
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
         }
 
-        function filterMarkers(type) {
-            const showPlanned = document.getElementById('plannedFilter').checked;
-            const showEmergency = document.getElementById('emergencyFilter').checked;
-            const showCompleted = document.getElementById('completedFilter').checked;
+        function exportToExcel() {
+            const works = JSON.parse(localStorage.getItem('works')) || [];
+            const ws = XLSX.utils.json_to_sheet(works);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Ремонтные работы");
+            XLSX.writeFile(wb, "repairs_report.xlsx");
+        }
 
-            markers.forEach(({marker, type, completed}) => {
-                let visible = true;
+        async function loadWeather(city) {
+            const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=YOUR_API_KEY&units=metric&lang=ru`);
+            const data = await response.json();
+            return data;
+        }
 
-                if (type === 'planned' && !showPlanned) visible = false;
-                if (type === 'emergency' && !showEmergency) visible = false;
-                if (completed && !showCompleted) visible = false;
-
-                if (visible) {
-                    map.geoObjects.add(marker);
-                } else {
-                    map.geoObjects.remove(marker);
-                }
-            });
+        // Функция для загрузки фотографий
+        function handlePhotoUpload(event) {
+            const files = event.target.files;
+            const photoGrid = document.getElementById('workPhotos');
+            
+            for (const file of files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const div = document.createElement('div');
+                    div.className = 'photo-item fade-in';
+                    div.innerHTML = `<img src="${e.target.result}" alt="Фото с места работ">`;
+                    photoGrid.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            }
         }
     </script>
 </body>
-</html> 
+</html>

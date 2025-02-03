@@ -30,52 +30,48 @@ let users = [
     { username: 'specialist', password: 'spec123', role: 'specialist', cities: ['moscow'] }
 ];
 
-// Заполняем список федеральных округов при загрузке страницы
+// Заполняем список областей при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
-    const federalDistrictSelect = document.getElementById('federalDistrict');
-    
-    for (const [key, district] of Object.entries(russianRegions)) {
-        const option = document.createElement('option');
-        option.value = key;
-        option.textContent = district.name;
-        federalDistrictSelect.appendChild(option);
-    }
-});
-
-function updateRegions() {
-    const federalDistrictSelect = document.getElementById('federalDistrict');
     const regionSelect = document.getElementById('region');
-    const citySelect = document.getElementById('city');
     
-    // Очищаем зависимые списки
-    regionSelect.innerHTML = '<option value="">Выберите регион</option>';
-    citySelect.innerHTML = '<option value="">Выберите город</option>';
+    // Собираем все области из всех округов
+    const allRegions = [];
+    for (const district of Object.values(russianRegions)) {
+        for (const [key, region] of Object.entries(district.regions)) {
+            allRegions.push({ key, ...region });
+        }
+    }
     
-    const selectedDistrict = federalDistrictSelect.value;
-    if (!selectedDistrict) return;
+    // Сортируем по алфавиту
+    allRegions.sort((a, b) => a.name.localeCompare(b.name));
     
-    const regions = russianRegions[selectedDistrict].regions;
-    for (const [key, region] of Object.entries(regions)) {
+    // Добавляем в select
+    allRegions.forEach(region => {
         const option = document.createElement('option');
-        option.value = key;
+        option.value = region.key;
         option.textContent = region.name;
         regionSelect.appendChild(option);
-    }
-}
+    });
+});
 
 function updateCities() {
-    const federalDistrictSelect = document.getElementById('federalDistrict');
     const regionSelect = document.getElementById('region');
     const citySelect = document.getElementById('city');
     
-    // Очищаем список городов
     citySelect.innerHTML = '<option value="">Выберите город</option>';
     
-    const selectedDistrict = federalDistrictSelect.value;
     const selectedRegion = regionSelect.value;
-    if (!selectedDistrict || !selectedRegion) return;
+    if (!selectedRegion) return;
     
-    const cities = russianRegions[selectedDistrict].regions[selectedRegion].cities;
+    // Ищем выбранную область во всех округах
+    let cities = [];
+    for (const district of Object.values(russianRegions)) {
+        if (district.regions[selectedRegion]) {
+            cities = district.regions[selectedRegion].cities;
+            break;
+        }
+    }
+    
     cities.forEach(city => {
         const option = document.createElement('option');
         option.value = city.toLowerCase().replace(/\s+/g, '_');

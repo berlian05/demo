@@ -27,12 +27,8 @@
             <div id="formView" class="view-content">
                 <form onsubmit="searchWorks(event)">
                     <div class="location-selects">
-                        <select id="federalDistrict" onchange="updateRegions()" required>
-                            <option value="">Выберите федеральный округ</option>
-                        </select>
-                        
                         <select id="region" onchange="updateCities()" required>
-                            <option value="">Выберите регион</option>
+                            <option value="">Выберите область</option>
                         </select>
                         
                         <select id="city" required>
@@ -191,7 +187,6 @@
 
         function searchWorks(event) {
             event.preventDefault();
-            const federalDistrict = document.getElementById('federalDistrict').value;
             const region = document.getElementById('region').value;
             const city = document.getElementById('city').value;
             const street = document.getElementById('streetSearch').value;
@@ -274,14 +269,35 @@
             }
 
             // Инициализация списков регионов и городов
-            const federalDistrictSelect = document.getElementById('federalDistrict');
-            for (const [key, district] of Object.entries(russianRegions)) {
+            const regionSelect = document.getElementById('region');
+            for (const [key, region] of Object.entries(russianRegions)) {
                 const option = document.createElement('option');
                 option.value = key;
-                option.textContent = district.name;
-                federalDistrictSelect.appendChild(option);
+                option.textContent = region.name;
+                regionSelect.appendChild(option);
             }
         });
+
+        // Обновляем список городов при выборе области
+        function updateCities() {
+            const regionSelect = document.getElementById('region');
+            const citySelect = document.getElementById('city');
+            
+            // Очищаем список городов
+            citySelect.innerHTML = '<option value="">Выберите город</option>';
+            
+            const selectedRegion = regionSelect.value;
+            if (!selectedRegion) return;
+            
+            // Добавляем города выбранного региона
+            const cities = russianRegions[selectedRegion].cities;
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city.toLowerCase().replace(/\s+/g, '_');
+                option.textContent = city;
+                citySelect.appendChild(option);
+            });
+        }
     </script>
 </body>
 </html> 
